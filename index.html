@@ -35,7 +35,8 @@
     }
 
     button,
-    input {
+    input,
+    select {
       font: inherit;
     }
 
@@ -144,7 +145,8 @@
     }
 
     .profile-grid,
-    .mode-grid {
+    .mode-grid,
+    .week-grid {
       display: grid;
       gap: 8px;
     }
@@ -213,6 +215,60 @@
       background: #fff7e8;
       border: 1px solid #f1d6a8;
       border-radius: 8px;
+    }
+
+    .sync-box {
+      margin-top: 16px;
+      padding: 12px;
+      background: #eefaf7;
+      border: 1px solid #b9e7dc;
+      border-radius: 8px;
+    }
+
+    .field {
+      display: grid;
+      gap: 5px;
+      margin-top: 9px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: .76rem;
+      font-weight: 850;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .field input {
+      width: 100%;
+      min-height: 40px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      outline: none;
+    }
+
+    .field input:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, .12);
+    }
+
+    .save-sync {
+      width: 100%;
+      min-height: 40px;
+      margin-top: 10px;
+      border-radius: 8px;
+      color: #fff;
+      background: var(--teal);
+      font-weight: 850;
+    }
+
+    .sync-status {
+      margin: 9px 0 0;
+      color: var(--muted);
+      font-size: .8rem;
+      line-height: 1.35;
     }
 
     .bank-list {
@@ -526,6 +582,13 @@
       line-height: 1.3;
     }
 
+    .progress-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 18px;
+    }
+
     @media (max-width: 860px) {
       .topbar,
       .layout,
@@ -566,7 +629,8 @@
       }
 
       .choices,
-      .activity-footer {
+      .activity-footer,
+      .progress-grid {
         grid-template-columns: 1fr;
       }
 
@@ -633,9 +697,30 @@
         <p class="group-title">Game Mode</p>
         <div class="mode-grid" id="modes"></div>
 
+        <p class="group-title">Weekly Set</p>
+        <div class="week-grid" id="weeks"></div>
+
         <div class="word-bank">
           <p class="group-title">Current Word Set</p>
           <div class="bank-list" id="wordBank"></div>
+        </div>
+
+        <div class="sync-box">
+          <p class="group-title">Supabase Sync</p>
+          <div class="field">
+            <label for="familyId">Family ID</label>
+            <input id="familyId" type="text" autocomplete="off" placeholder="gu-family">
+          </div>
+          <div class="field">
+            <label for="supabaseUrl">Project URL</label>
+            <input id="supabaseUrl" type="url" autocomplete="off" placeholder="https://xxxx.supabase.co">
+          </div>
+          <div class="field">
+            <label for="supabaseAnonKey">Anon Key</label>
+            <input id="supabaseAnonKey" type="password" autocomplete="off" placeholder="public anon key">
+          </div>
+          <button class="save-sync" id="saveSyncBtn" type="button">Save Sync Settings</button>
+          <p class="sync-status" id="syncStatus">Progress is saved in this browser until Supabase is connected.</p>
         </div>
       </aside>
 
@@ -690,6 +775,12 @@
             </button>
           </div>
           <div class="feedback" id="feedback">Pick an answer, then check it.</div>
+          <div class="progress-grid">
+            <div class="mini"><span>Attempts</span><strong id="progressAttempts">0</strong></div>
+            <div class="mini"><span>Correct</span><strong id="progressCorrect">0</strong></div>
+            <div class="mini"><span>Accuracy</span><strong id="progressAccuracy">0%</strong></div>
+            <div class="mini"><span>Saved</span><strong id="progressSaved">Local</strong></div>
+          </div>
           <div class="activity-footer">
             <div class="mini"><span>Parent Prompt</span><strong id="parentPrompt">Ask Evelyn to explain why the chosen word fits the sentence.</strong></div>
             <div class="mini"><span>Writing Boost</span><strong id="writingBoost">Write a new sentence with the same vocabulary word.</strong></div>
@@ -748,6 +839,119 @@
       }
     };
 
+    const weeklySets = {
+      evelyn: [
+        {
+          label: "Week 1",
+          theme: "Discovery Words",
+          words: profiles.evelyn.words
+        },
+        {
+          label: "Week 2",
+          theme: "Story Words",
+          words: [
+            { word: "describe", clue: "to tell about using details", sentence: "Please ___ the setting of the story.", choices: ["describe", "shrink", "borrow", "blink"], synonym: "explain", antonym: "hide" },
+            { word: "solution", clue: "an answer to a problem", sentence: "The class found a ___ for the messy supply shelf.", choices: ["solution", "shadow", "button", "season"], synonym: "answer", antonym: "problem" },
+            { word: "mysterious", clue: "hard to explain or understand", sentence: "A ___ sound came from the attic.", choices: ["mysterious", "simple", "sunny", "polite"], synonym: "puzzling", antonym: "obvious" },
+            { word: "journey", clue: "a trip from one place to another", sentence: "The family began their ___ before sunrise.", choices: ["journey", "blanket", "whistle", "corner"], synonym: "trip", antonym: "stay" },
+            { word: "ordinary", clue: "normal or usual", sentence: "It looked like an ___ rock until it sparkled.", choices: ["ordinary", "ancient", "brave", "gentle"], synonym: "usual", antonym: "special" },
+            { word: "careful", clue: "done with attention", sentence: "A ___ reader notices small clues.", choices: ["careful", "rapid", "empty", "rough"], synonym: "thoughtful", antonym: "careless" },
+            { word: "investigate", clue: "to look into carefully", sentence: "The students will ___ why plants lean toward light.", choices: ["investigate", "decorate", "forget", "float"], synonym: "study", antonym: "ignore" },
+            { word: "patient", clue: "able to wait calmly", sentence: "The ___ artist let the paint dry first.", choices: ["patient", "greedy", "bitter", "wild"], synonym: "calm", antonym: "impatient" },
+            { word: "surprise", clue: "something unexpected", sentence: "The ending of the book was a ___ to everyone.", choices: ["surprise", "habit", "level", "thread"], synonym: "shock", antonym: "expectation" },
+            { word: "reason", clue: "why something happens", sentence: "What is the ___ the ice melted?", choices: ["reason", "blanket", "branch", "ticket"], synonym: "cause", antonym: "result" }
+          ]
+        },
+        {
+          label: "Week 3",
+          theme: "Science Words",
+          words: [
+            { word: "observe", clue: "to watch carefully", sentence: "We will ___ the caterpillar each day.", choices: ["observe", "polish", "drift", "argue"], synonym: "notice", antonym: "miss" },
+            { word: "energy", clue: "power used to do work", sentence: "Food gives our bodies ___.", choices: ["energy", "silence", "fabric", "distance"], synonym: "power", antonym: "tiredness" },
+            { word: "surface", clue: "the outside or top layer", sentence: "Ice formed on the ___ of the pond.", choices: ["surface", "memory", "custom", "valley"], synonym: "top", antonym: "inside" },
+            { word: "cycle", clue: "events that repeat in order", sentence: "We learned about the water ___.", choices: ["cycle", "ladder", "festival", "secret"], synonym: "loop", antonym: "line" },
+            { word: "absorb", clue: "to soak up", sentence: "A sponge can ___ spilled water.", choices: ["absorb", "reject", "balance", "announce"], synonym: "soak", antonym: "repel" },
+            { word: "expand", clue: "to grow larger", sentence: "The balloon will ___ when air goes inside.", choices: ["expand", "vanish", "divide", "whisper"], synonym: "grow", antonym: "shrink" },
+            { word: "measure", clue: "to find the size or amount", sentence: "Use a ruler to ___ the leaf.", choices: ["measure", "invent", "crawl", "gather"], synonym: "calculate", antonym: "guess" },
+            { word: "protect", clue: "to keep safe", sentence: "The shell helps ___ the turtle.", choices: ["protect", "damage", "invite", "borrow"], synonym: "guard", antonym: "harm" },
+            { word: "similar", clue: "almost the same", sentence: "The two flowers are ___ in color.", choices: ["similar", "empty", "heavy", "sour"], synonym: "alike", antonym: "different" },
+            { word: "result", clue: "what happens because of something", sentence: "The ___ of mixing blue and yellow is green.", choices: ["result", "reason", "border", "noise"], synonym: "outcome", antonym: "cause" }
+          ]
+        },
+        {
+          label: "Week 4",
+          theme: "Character Words",
+          words: [
+            { word: "generous", clue: "willing to share", sentence: "The ___ neighbor gave books to the library.", choices: ["generous", "fragile", "narrow", "rapid"], synonym: "giving", antonym: "selfish" },
+            { word: "honest", clue: "truthful", sentence: "An ___ person tells the truth.", choices: ["honest", "dizzy", "ancient", "silent"], synonym: "truthful", antonym: "dishonest" },
+            { word: "confident", clue: "sure about what you can do", sentence: "Evelyn felt ___ before her presentation.", choices: ["confident", "careless", "dusty", "hollow"], synonym: "sure", antonym: "unsure" },
+            { word: "respect", clue: "to treat someone with care", sentence: "We ___ classmates by listening.", choices: ["respect", "scatter", "melt", "avoid"], synonym: "honor", antonym: "disrespect" },
+            { word: "effort", clue: "hard work", sentence: "The puzzle took time and ___.", choices: ["effort", "surface", "journey", "shadow"], synonym: "work", antonym: "ease" },
+            { word: "focus", clue: "to pay close attention", sentence: "It is easier to ___ in a quiet room.", choices: ["focus", "wander", "spill", "freeze"], synonym: "concentrate", antonym: "ignore" },
+            { word: "include", clue: "to make someone part of a group", sentence: "Please ___ everyone in the game.", choices: ["include", "exclude", "measure", "protect"], synonym: "add", antonym: "exclude" },
+            { word: "proud", clue: "pleased about something good", sentence: "Ella was ___ of her neat handwriting.", choices: ["proud", "bitter", "ordinary", "tiny"], synonym: "pleased", antonym: "ashamed" },
+            { word: "gentle", clue: "kind and soft", sentence: "Use a ___ touch with the small plant.", choices: ["gentle", "rough", "rapid", "noisy"], synonym: "soft", antonym: "rough" },
+            { word: "responsible", clue: "trusted to do what is needed", sentence: "A ___ student returns library books on time.", choices: ["responsible", "mysterious", "empty", "wild"], synonym: "dependable", antonym: "careless" }
+          ]
+        }
+      ],
+      ella: [
+        {
+          label: "Week 1",
+          theme: "Everyday Words",
+          words: profiles.ella.words
+        },
+        {
+          label: "Week 2",
+          theme: "Action Words",
+          words: [
+            { word: "carry", clue: "to hold and take with you", sentence: "Can you ___ the bag to the car?", choices: ["carry", "sleep", "draw", "melt"], synonym: "bring", antonym: "drop" },
+            { word: "crawl", clue: "to move on hands and knees", sentence: "The baby can ___ across the rug.", choices: ["crawl", "sing", "bake", "read"], synonym: "creep", antonym: "stand" },
+            { word: "build", clue: "to make something", sentence: "We can ___ a tower with blocks.", choices: ["build", "wash", "hide", "fall"], synonym: "make", antonym: "break" },
+            { word: "share", clue: "to let someone use part of something", sentence: "Please ___ the markers with Sam.", choices: ["share", "grab", "tear", "nap"], synonym: "give", antonym: "keep" },
+            { word: "listen", clue: "to hear with care", sentence: "We ___ when the teacher reads.", choices: ["listen", "paint", "kick", "stir"], synonym: "hear", antonym: "ignore" },
+            { word: "smile", clue: "a happy face", sentence: "Mom gave a big ___ when she saw the card.", choices: ["smile", "storm", "stone", "snack"], synonym: "grin", antonym: "frown" },
+            { word: "climb", clue: "to go up", sentence: "The cat can ___ the tree.", choices: ["climb", "sip", "fold", "open"], synonym: "scale", antonym: "descend" },
+            { word: "choose", clue: "to pick", sentence: "Ella can ___ a book to read.", choices: ["choose", "drop", "float", "sleep"], synonym: "pick", antonym: "reject" },
+            { word: "help", clue: "to make something easier for someone", sentence: "I will ___ you clean the table.", choices: ["help", "hide", "break", "skip"], synonym: "assist", antonym: "hurt" },
+            { word: "start", clue: "to begin", sentence: "We will ___ our game after lunch.", choices: ["start", "end", "cry", "dig"], synonym: "begin", antonym: "finish" }
+          ]
+        },
+        {
+          label: "Week 3",
+          theme: "Describe It",
+          words: [
+            { word: "round", clue: "shaped like a circle", sentence: "The ball is ___.", choices: ["round", "sad", "hot", "late"], synonym: "circular", antonym: "square" },
+            { word: "deep", clue: "going far down", sentence: "The pool is ___ at this end.", choices: ["deep", "soft", "fast", "clean"], synonym: "low", antonym: "shallow" },
+            { word: "wide", clue: "large from side to side", sentence: "The road is ___ enough for two cars.", choices: ["wide", "tiny", "kind", "wet"], synonym: "broad", antonym: "narrow" },
+            { word: "quiet", clue: "not loud", sentence: "The room was ___ during story time.", choices: ["quiet", "messy", "quick", "green"], synonym: "silent", antonym: "loud" },
+            { word: "sweet", clue: "tasting like sugar", sentence: "The peach was ___.", choices: ["sweet", "near", "sharp", "empty"], synonym: "sugary", antonym: "sour" },
+            { word: "brisk", clue: "quick and lively", sentence: "We took a ___ walk after dinner.", choices: ["brisk", "dirty", "flat", "blue"], synonym: "quick", antonym: "slow" },
+            { word: "safe", clue: "away from danger", sentence: "Wear a helmet to stay ___.", choices: ["safe", "lost", "wild", "sleepy"], synonym: "protected", antonym: "unsafe" },
+            { word: "neat", clue: "clean and in order", sentence: "Ella kept her desk ___.", choices: ["neat", "sad", "wet", "late"], synonym: "tidy", antonym: "messy" },
+            { word: "warm", clue: "a little hot", sentence: "The soup was ___, but not too hot.", choices: ["warm", "dark", "mean", "huge"], synonym: "cozy", antonym: "cold" },
+            { word: "tall", clue: "high from bottom to top", sentence: "The ___ tree gave us shade.", choices: ["tall", "tiny", "sour", "quick"], synonym: "high", antonym: "short" }
+          ]
+        },
+        {
+          label: "Week 4",
+          theme: "School Words",
+          words: [
+            { word: "learn", clue: "to find out how or why", sentence: "We ___ new words at school.", choices: ["learn", "spill", "nap", "fold"], synonym: "study", antonym: "forget" },
+            { word: "write", clue: "to make words with letters", sentence: "I can ___ my name.", choices: ["write", "jump", "hide", "mix"], synonym: "print", antonym: "erase" },
+            { word: "count", clue: "to say numbers in order", sentence: "Can you ___ ten shells?", choices: ["count", "sleep", "paint", "cry"], synonym: "number", antonym: "guess" },
+            { word: "spell", clue: "to name the letters in a word", sentence: "Ella can ___ cat.", choices: ["spell", "climb", "wash", "throw"], synonym: "letter", antonym: "misspell" },
+            { word: "story", clue: "a tale with events", sentence: "Dad read a funny ___ at bedtime.", choices: ["story", "shoe", "plate", "cloud"], synonym: "tale", antonym: "fact" },
+            { word: "pencil", clue: "a tool used to write", sentence: "I sharpened my ___ before class.", choices: ["pencil", "window", "garden", "river"], synonym: "writer", antonym: "eraser" },
+            { word: "paper", clue: "thin sheets for writing", sentence: "Please put your name on the ___.", choices: ["paper", "ladder", "flower", "basket"], synonym: "sheet", antonym: "screen" },
+            { word: "answer", clue: "a reply to a question", sentence: "Raise your hand if you know the ___.", choices: ["answer", "button", "sand", "cup"], synonym: "reply", antonym: "question" },
+            { word: "class", clue: "a group of students", sentence: "Our ___ made a card together.", choices: ["class", "beach", "moon", "rope"], synonym: "group", antonym: "alone" },
+            { word: "read", clue: "to look at words and understand them", sentence: "I like to ___ books about animals.", choices: ["read", "kick", "stir", "sleep"], synonym: "study", antonym: "ignore" }
+          ]
+        }
+      ]
+    };
+
     const modes = {
       choice: {
         title: "Choose the best word.",
@@ -782,20 +986,39 @@
       sentence: '<svg class="mode-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M17 12h3" stroke="#be123c" stroke-width="2.2" stroke-linecap="round"/></svg>'
     };
 
+    const storageKeys = {
+      config: "vocabPracticeSupabaseConfig",
+      progress: "vocabPracticeProgress"
+    };
+
+    function defaultWeekIndex() {
+      const now = new Date();
+      const yearStart = new Date(now.getFullYear(), 0, 1);
+      const dayOffset = Math.floor((now - yearStart) / 86400000);
+      return Math.floor(dayOffset / 7) % 4;
+    }
+
     const state = {
       profile: "evelyn",
       mode: "choice",
+      week: defaultWeekIndex(),
       index: 0,
       stars: 0,
+      attempts: 0,
+      correct: 0,
       selected: "",
       built: "",
       checked: false,
-      awarded: false
+      awarded: false,
+      config: loadConfig(),
+      syncing: false,
+      savedTo: "Local"
     };
 
     const el = {
       profiles: document.querySelector("#profiles"),
       modes: document.querySelector("#modes"),
+      weeks: document.querySelector("#weeks"),
       wordBank: document.querySelector("#wordBank"),
       statProfile: document.querySelector("#statProfile"),
       statRound: document.querySelector("#statRound"),
@@ -810,17 +1033,153 @@
       nextBtn: document.querySelector("#nextBtn"),
       resetBtn: document.querySelector("#resetBtn"),
       feedback: document.querySelector("#feedback"),
+      familyId: document.querySelector("#familyId"),
+      supabaseUrl: document.querySelector("#supabaseUrl"),
+      supabaseAnonKey: document.querySelector("#supabaseAnonKey"),
+      saveSyncBtn: document.querySelector("#saveSyncBtn"),
+      syncStatus: document.querySelector("#syncStatus"),
+      progressAttempts: document.querySelector("#progressAttempts"),
+      progressCorrect: document.querySelector("#progressCorrect"),
+      progressAccuracy: document.querySelector("#progressAccuracy"),
+      progressSaved: document.querySelector("#progressSaved"),
       parentPrompt: document.querySelector("#parentPrompt"),
       writingBoost: document.querySelector("#writingBoost"),
       bonusPrompt: document.querySelector("#bonusPrompt")
     };
 
+    function loadConfig() {
+      try {
+        return JSON.parse(localStorage.getItem(storageKeys.config)) || {
+          familyId: "gu-family",
+          supabaseUrl: "",
+          supabaseAnonKey: ""
+        };
+      } catch {
+        return { familyId: "gu-family", supabaseUrl: "", supabaseAnonKey: "" };
+      }
+    }
+
     function currentProfile() {
       return profiles[state.profile];
     }
 
+    function currentWeek() {
+      return weeklySets[state.profile][state.week % weeklySets[state.profile].length];
+    }
+
+    function currentWords() {
+      return currentWeek().words;
+    }
+
     function currentWord() {
-      return currentProfile().words[state.index % currentProfile().words.length];
+      return currentWords()[state.index % currentWords().length];
+    }
+
+    function currentWeekKey() {
+      return `${state.profile}-${currentWeek().label.toLowerCase().replaceAll(" ", "-")}`;
+    }
+
+    function progressKey() {
+      return `${state.config.familyId || "gu-family"}:${state.profile}:${currentWeekKey()}:${state.mode}`;
+    }
+
+    function loadLocalProgress() {
+      try {
+        const all = JSON.parse(localStorage.getItem(storageKeys.progress)) || {};
+        return all[progressKey()] || null;
+      } catch {
+        return null;
+      }
+    }
+
+    function saveLocalProgress(row) {
+      const all = JSON.parse(localStorage.getItem(storageKeys.progress) || "{}");
+      all[progressKey()] = row;
+      localStorage.setItem(storageKeys.progress, JSON.stringify(all));
+    }
+
+    function applyProgress(row) {
+      if (!row) {
+        state.stars = 0;
+        state.attempts = 0;
+        state.correct = 0;
+        state.index = 0;
+        state.savedTo = hasSupabaseConfig() ? "Supabase ready" : "Local";
+        return;
+      }
+      state.stars = Number(row.stars || 0);
+      state.attempts = Number(row.attempts || 0);
+      state.correct = Number(row.correct || 0);
+      state.index = Number(row.current_index || 0) % currentWords().length;
+      state.savedTo = row.saved_to || "Local";
+    }
+
+    function currentProgressRow() {
+      return {
+        family_id: state.config.familyId || "gu-family",
+        learner: state.profile,
+        week_key: currentWeekKey(),
+        week_label: currentWeek().label,
+        week_theme: currentWeek().theme,
+        mode: state.mode,
+        stars: state.stars,
+        attempts: state.attempts,
+        correct: state.correct,
+        current_index: state.index,
+        completed: {
+          word: currentWord().word,
+          savedAt: new Date().toISOString()
+        },
+        saved_to: state.savedTo,
+        last_practiced_at: new Date().toISOString()
+      };
+    }
+
+    function hasSupabaseConfig() {
+      return Boolean(state.config.supabaseUrl && state.config.supabaseAnonKey && state.config.familyId);
+    }
+
+    function updateSyncStatus(text) {
+      el.syncStatus.textContent = text;
+    }
+
+    async function saveProgress() {
+      const row = currentProgressRow();
+      row.saved_to = "Local";
+      saveLocalProgress(row);
+      state.savedTo = "Local";
+      updateChrome();
+
+      if (!hasSupabaseConfig()) {
+        updateSyncStatus("Progress saved in this browser. Add Supabase settings to sync online.");
+        return;
+      }
+
+      state.syncing = true;
+      updateSyncStatus("Saving progress to Supabase...");
+      try {
+        const baseUrl = state.config.supabaseUrl.replace(/\/$/, "");
+        const response = await fetch(`${baseUrl}/rest/v1/practice_progress?on_conflict=family_id,learner,week_key,mode`, {
+          method: "POST",
+          headers: {
+            apikey: state.config.supabaseAnonKey,
+            Authorization: `Bearer ${state.config.supabaseAnonKey}`,
+            "Content-Type": "application/json",
+            Prefer: "resolution=merge-duplicates,return=representation"
+          },
+          body: JSON.stringify({ ...row, saved_to: "Supabase" })
+        });
+
+        if (!response.ok) throw new Error(`Supabase returned ${response.status}`);
+        state.savedTo = "Supabase";
+        updateSyncStatus("Progress saved to Supabase.");
+      } catch (error) {
+        state.savedTo = "Local";
+        updateSyncStatus(`Supabase save failed. Local progress is still saved. ${error.message}`);
+      } finally {
+        state.syncing = false;
+        updateChrome();
+      }
     }
 
     function shuffle(items) {
@@ -836,24 +1195,35 @@
     function updateChrome() {
       const profile = currentProfile();
       const mode = modes[state.mode];
+      const words = currentWords();
       el.statProfile.textContent = profile.short;
-      el.statRound.textContent = `${(state.index % profile.words.length) + 1} / ${profile.words.length}`;
+      el.statRound.textContent = `${(state.index % words.length) + 1} / ${words.length}`;
       el.statStars.textContent = state.stars;
       el.kicker.textContent = profile.grade;
       el.modeTitle.textContent = mode.title;
-      el.modeDescription.textContent = mode.summary;
+      el.modeDescription.textContent = `${currentWeek().label}: ${currentWeek().theme}. ${mode.summary}`;
       el.questionTitle.textContent = mode.label;
-      el.roundPill.textContent = `Round ${(state.index % profile.words.length) + 1}`;
+      el.roundPill.textContent = `${currentWeek().label} · Round ${(state.index % words.length) + 1}`;
       el.parentPrompt.textContent = profile.parentPrompt;
       el.writingBoost.textContent = profile.writingBoost;
       el.bonusPrompt.textContent = profile.bonusPrompt;
-      el.wordBank.innerHTML = profile.words.map((item) => `<span class="chip">${item.word}</span>`).join("");
+      el.wordBank.innerHTML = words.map((item) => `<span class="chip">${item.word}</span>`).join("");
+      el.familyId.value = state.config.familyId || "";
+      el.supabaseUrl.value = state.config.supabaseUrl || "";
+      el.supabaseAnonKey.value = state.config.supabaseAnonKey || "";
+      el.progressAttempts.textContent = state.attempts;
+      el.progressCorrect.textContent = state.correct;
+      el.progressAccuracy.textContent = state.attempts ? `${Math.round((state.correct / state.attempts) * 100)}%` : "0%";
+      el.progressSaved.textContent = state.savedTo;
 
       [...el.profiles.children].forEach((button) => {
         button.setAttribute("aria-pressed", button.dataset.profile === state.profile);
       });
       [...el.modes.children].forEach((button) => {
         button.setAttribute("aria-pressed", button.dataset.mode === state.mode);
+      });
+      [...el.weeks.children].forEach((button) => {
+        button.setAttribute("aria-pressed", Number(button.dataset.week) === state.week);
       });
     }
 
@@ -874,7 +1244,7 @@
 
     function renderMeaning() {
       const item = currentWord();
-      const decoys = currentProfile().words
+      const decoys = currentWords()
         .filter((word) => word.word !== item.word)
         .slice(0, 3)
         .map((word) => word.clue);
@@ -942,6 +1312,13 @@
           <span><strong>${mode.label}</strong><small>${mode.summary}</small></span>
         </button>
       `).join("");
+
+      el.weeks.innerHTML = weeklySets[state.profile].map((week, index) => `
+        <button class="select-btn" type="button" data-week="${index}" aria-pressed="${index === state.week}">
+          <span class="avatar ${currentProfile().colorClass}">${index + 1}</span>
+          <span><strong>${week.label}</strong><small>${week.theme}</small></span>
+        </button>
+      `).join("");
     }
 
     function setFeedback(ok, item) {
@@ -951,7 +1328,7 @@
         : `Try again. Look for the word that means ${item.clue}.`;
     }
 
-    function checkAnswer() {
+    async function checkAnswer() {
       const item = currentWord();
       let ok = false;
       if (state.mode === "choice") ok = state.selected === item.word;
@@ -964,36 +1341,46 @@
       }
 
       state.checked = true;
+      if (!state.awarded) state.attempts += 1;
       if (ok && !state.awarded) {
         state.stars += 1;
+        state.correct += 1;
         state.awarded = true;
       }
       setFeedback(ok, item);
       if (state.mode === "choice") renderChoice();
       if (state.mode === "meaning") renderMeaning();
       updateChrome();
+      await saveProgress();
     }
 
     function nextQuestion() {
-      state.index = (state.index + 1) % currentProfile().words.length;
+      state.index = (state.index + 1) % currentWords().length;
       renderQuestion();
+      saveProgress();
     }
 
     function resetPractice() {
       state.index = 0;
       state.stars = 0;
+      state.attempts = 0;
+      state.correct = 0;
       renderQuestion();
+      saveProgress();
     }
 
     buildControls();
+    applyProgress(loadLocalProgress());
     renderQuestion();
 
     el.profiles.addEventListener("click", (event) => {
       const button = event.target.closest("[data-profile]");
       if (!button) return;
       state.profile = button.dataset.profile;
+      state.week = Math.min(state.week, weeklySets[state.profile].length - 1);
       state.index = 0;
-      state.stars = 0;
+      buildControls();
+      applyProgress(loadLocalProgress());
       renderQuestion();
     });
 
@@ -1001,7 +1388,29 @@
       const button = event.target.closest("[data-mode]");
       if (!button) return;
       state.mode = button.dataset.mode;
+      applyProgress(loadLocalProgress());
       renderQuestion();
+    });
+
+    el.weeks.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-week]");
+      if (!button) return;
+      state.week = Number(button.dataset.week);
+      state.index = 0;
+      applyProgress(loadLocalProgress());
+      renderQuestion();
+    });
+
+    el.saveSyncBtn.addEventListener("click", async () => {
+      state.config = {
+        familyId: el.familyId.value.trim() || "gu-family",
+        supabaseUrl: el.supabaseUrl.value.trim(),
+        supabaseAnonKey: el.supabaseAnonKey.value.trim()
+      };
+      localStorage.setItem(storageKeys.config, JSON.stringify(state.config));
+      applyProgress(loadLocalProgress());
+      updateChrome();
+      await saveProgress();
     });
 
     el.questionPanel.addEventListener("click", (event) => {

@@ -14,6 +14,18 @@ python3 -m http.server 4173
 
 Open `http://127.0.0.1:4173/`.
 
+## Supabase Progress Save
+
+Run [supabase-schema.sql](./supabase-schema.sql) in Supabase SQL Editor.
+
+Then open the app and enter:
+
+- Family ID: for example `gu-family`
+- Project URL: Supabase Project Settings -> API -> Project URL
+- Anon Key: Supabase Project Settings -> API -> Project API keys -> `anon public`
+
+The app saves progress locally first, then syncs rows into the `practice_progress` table when Supabase settings are present.
+
 ## Deploy To Vercel With Token
 
 From this folder:
