@@ -769,6 +769,12 @@
               </svg>
               Check
             </button>
+            <button class="action secondary" id="prevBtn" type="button" title="Previous question">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M19 12H5m6-6-6 6 6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+              Previous
+            </button>
             <button class="action secondary" id="nextBtn" type="button" title="Next question">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -1177,6 +1183,7 @@
       built: "",
       checked: false,
       awarded: false,
+      attemptCounted: false,
       config: loadConfig(),
       syncing: false,
       savedTo: "Local"
@@ -1197,6 +1204,7 @@
       roundPill: document.querySelector("#roundPill"),
       questionPanel: document.querySelector("#questionPanel"),
       checkBtn: document.querySelector("#checkBtn"),
+      prevBtn: document.querySelector("#prevBtn"),
       nextBtn: document.querySelector("#nextBtn"),
       resetBtn: document.querySelector("#resetBtn"),
       feedback: document.querySelector("#feedback"),
@@ -1537,6 +1545,7 @@
       state.built = "";
       state.checked = false;
       state.awarded = false;
+      state.attemptCounted = false;
       el.feedback.className = "feedback";
       el.feedback.textContent = "Pick an answer, then check it.";
       updateChrome();
@@ -1615,7 +1624,10 @@
 
       state.checked = true;
       const answerRecord = makeAnswerRecord(item, ok);
-      if (!state.awarded) state.attempts += 1;
+      if (!state.attemptCounted) {
+        state.attempts += 1;
+        state.attemptCounted = true;
+      }
       if (ok && !state.awarded) {
         state.stars += 1;
         state.correct += 1;
@@ -1627,6 +1639,12 @@
       if (state.mode === "meaning") renderMeaning();
       updateChrome();
       await saveProgress(answerRecord);
+    }
+
+    function previousQuestion() {
+      state.index = (state.index - 1 + currentWords().length) % currentWords().length;
+      renderQuestion();
+      saveProgress();
     }
 
     function nextQuestion() {
@@ -1713,6 +1731,7 @@
     });
 
     el.checkBtn.addEventListener("click", checkAnswer);
+    el.prevBtn.addEventListener("click", previousQuestion);
     el.nextBtn.addEventListener("click", nextQuestion);
     el.resetBtn.addEventListener("click", resetPractice);
   </script>
