@@ -1395,8 +1395,8 @@
 
     function currentProgressRow(answerRecord = null) {
       const recentAnswers = answerRecord
-        ? [answerRecord, ...state.recentAnswers.filter((answer) => answer.answer_id !== answerRecord.answer_id)].slice(0, 20)
-        : state.recentAnswers.slice(0, 20);
+        ? [answerRecord, ...state.recentAnswers.filter((answer) => answer.answer_id !== answerRecord.answer_id)]
+        : state.recentAnswers;
       const previousAnswer = answerRecord || state.lastAnswer || recentAnswers[0] || {};
       const accuracyPercent = state.attempts ? Math.round((state.correct / state.attempts) * 100) : 0;
       const row = {
@@ -1415,7 +1415,6 @@
         completed: previousAnswer,
         previous_answer: previousAnswer,
         recent_answers: recentAnswers,
-        family_board: familyBoard,
         saved_to: state.savedTo,
         last_practiced_at: new Date().toISOString()
       };
@@ -1644,7 +1643,7 @@
       el.questionPanel.innerHTML = `
         <p class="question">${item.sentence}</p>
         <p class="hint">Clue: ${item.clue}</p>
-        <input class="type-answer" id="typedAnswer" type="text" autocomplete="off" spellcheck="false" placeholder="Type the missing word">
+        <input class="type-answer" id="typedAnswer" type="text" autocomplete="off" spellcheck="false" placeholder="Type the missing word" value="${state.selected}">
       `;
       document.querySelector("#typedAnswer").focus();
     }
@@ -1657,6 +1656,7 @@
       state.attemptCounted = false;
       el.feedback.className = "feedback";
       el.feedback.textContent = "Pick an answer, then check it.";
+      restorePreviousAnswer();
       updateChrome();
       if (state.mode === "choice") renderChoice();
       if (state.mode === "meaning") renderMeaning();
@@ -1698,6 +1698,30 @@
       if (state.mode === "completion") return state.built || "";
       if (state.mode === "sentence") return state.selected || "";
       return state.selected || "";
+    }
+
+    function previousAnswerForCurrentQuestion() {
+      const item = currentWord();
+      const round = (state.index % currentWords().length) + 1;
+      return state.recentAnswers.find((answer) => (
+        answer &&
+        answer.mode === state.mode &&
+        answer.week_key === currentWeekKey() &&
+        answer.round === round &&
+        answer.word === item.word
+      ));
+    }
+
+    function restorePreviousAnswer() {
+      const answer = previousAnswerForCurrentQuestion();
+      if (!answer) return;
+      state.selected = answer.answer || "";
+      state.built = state.mode === "completion" ? state.selected : "";
+      state.checked = true;
+      state.attemptCounted = true;
+      state.awarded = Boolean(answer.correct);
+      state.lastAnswer = answer;
+      setFeedback(Boolean(answer.correct), currentWord());
     }
 
     function makeAnswerRecord(item, ok) {
