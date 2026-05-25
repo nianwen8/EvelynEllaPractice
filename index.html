@@ -721,11 +721,11 @@
           </div>
           <div class="field">
             <label for="supabaseUrl">Project URL</label>
-            <input id="supabaseUrl" type="url" autocomplete="off" placeholder="https://xxxx.supabase.co">
+            <input id="supabaseUrl" type="url" autocomplete="off" placeholder="https://zfvdwqhoitknxnxdwste.supabase.co">
           </div>
           <div class="field">
-            <label for="supabaseAnonKey">Anon Key</label>
-            <input id="supabaseAnonKey" type="password" autocomplete="off" placeholder="public anon key">
+            <label for="supabaseAnonKey">Anon Public Key</label>
+            <input id="supabaseAnonKey" type="password" autocomplete="off" placeholder="safe browser anon key">
           </div>
           <button class="save-sync" id="saveSyncBtn" type="button">Save Sync Settings</button>
           <p class="sync-status" id="syncStatus">Progress is saved in this browser until Supabase is connected.</p>
@@ -806,6 +806,12 @@
   </main>
 
   <script>
+    const defaultSupabaseConfig = {
+      familyId: "gu-family",
+      supabaseUrl: "https://zfvdwqhoitknxnxdwste.supabase.co",
+      supabaseAnonKey: ""
+    };
+
     const profiles = {
       evelyn: {
         name: "Evelyn Gu",
@@ -1224,13 +1230,16 @@
 
     function loadConfig() {
       try {
-        return JSON.parse(localStorage.getItem(storageKeys.config)) || {
-          familyId: "gu-family",
-          supabaseUrl: "",
-          supabaseAnonKey: ""
+        const stored = JSON.parse(localStorage.getItem(storageKeys.config)) || {};
+        return {
+          ...defaultSupabaseConfig,
+          ...stored,
+          familyId: stored.familyId || defaultSupabaseConfig.familyId,
+          supabaseUrl: stored.supabaseUrl || defaultSupabaseConfig.supabaseUrl,
+          supabaseAnonKey: stored.supabaseAnonKey || defaultSupabaseConfig.supabaseAnonKey
         };
       } catch {
-        return { familyId: "gu-family", supabaseUrl: "", supabaseAnonKey: "" };
+        return { ...defaultSupabaseConfig };
       }
     }
 
@@ -1380,6 +1389,7 @@
           headers: supabaseHeaders()
         });
 
+        if (response.status === 404) throw new Error("practice_progress table not found. Run supabase-schema.sql in Supabase SQL Editor.");
         if (!response.ok) throw new Error(`Supabase returned ${response.status}`);
         const rows = await response.json();
         if (rows[0]) {
@@ -1423,6 +1433,7 @@
           body: JSON.stringify({ ...row, saved_to: "Supabase" })
         });
 
+        if (response.status === 404) throw new Error("practice_progress table not found. Run supabase-schema.sql in Supabase SQL Editor.");
         if (!response.ok) throw new Error(`Supabase returned ${response.status}`);
         const rows = await response.json();
         if (rows[0]) {
