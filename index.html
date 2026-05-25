@@ -194,6 +194,10 @@
       background: var(--teal);
     }
 
+    .teng {
+      background: var(--gold);
+    }
+
     .mode-icon {
       width: 34px;
       height: 34px;
@@ -683,7 +687,7 @@
         </svg>
         <div>
           <h1>Vocabulary Fun Practice</h1>
-          <p class="subtitle">Word completion, word choice, spelling, and sentence power for Evelyn, Ella, and Nianwen.</p>
+          <p class="subtitle">Word completion, word choice, spelling, and sentence power for Evelyn, Ella, Nianwen, and Teng.</p>
         </div>
       </div>
       <div class="score-strip" aria-label="Practice score">
@@ -862,6 +866,28 @@
           { word: "credible", clue: "able to be believed or trusted", sentence: "The report was more ___ after sources were added.", choices: ["credible", "careless", "fictional", "hollow"], synonym: "trustworthy", antonym: "unreliable" },
           { word: "synthesize", clue: "to combine ideas into a useful whole", sentence: "She had to ___ notes from three meetings into one summary.", choices: ["synthesize", "separate", "erase", "distract"], synonym: "combine", antonym: "divide" }
         ]
+      },
+      teng: {
+        name: "Teng",
+        short: "Teng",
+        grade: "Adult",
+        initials: "TG",
+        colorClass: "teng",
+        parentPrompt: "Connect the word to a work, family, or planning situation.",
+        writingBoost: "Write one sentence that uses the word in a clear adult context.",
+        bonusPrompt: "Explain when this word would be more precise than a simpler synonym.",
+        words: [
+          { word: "strategic", clue: "planned to reach an important goal", sentence: "A ___ choice today can save time next month.", choices: ["strategic", "random", "minor", "fragile"], synonym: "planned", antonym: "aimless" },
+          { word: "efficient", clue: "working well without wasting time or effort", sentence: "The new checklist made the morning routine more ___.", choices: ["efficient", "careless", "ornate", "uncertain"], synonym: "productive", antonym: "wasteful" },
+          { word: "adaptable", clue: "able to change when conditions change", sentence: "An ___ leader can adjust when plans shift.", choices: ["adaptable", "rigid", "silent", "formal"], synonym: "flexible", antonym: "inflexible" },
+          { word: "delegate", clue: "to assign responsibility to someone else", sentence: "It is healthy to ___ tasks instead of doing everything alone.", choices: ["delegate", "hoard", "delay", "erase"], synonym: "assign", antonym: "retain" },
+          { word: "evaluate", clue: "to judge quality, value, or importance", sentence: "We should ___ the options before deciding.", choices: ["evaluate", "ignore", "polish", "announce"], synonym: "assess", antonym: "overlook" },
+          { word: "proactive", clue: "acting early to prevent problems", sentence: "A ___ reminder can prevent a missed deadline.", choices: ["proactive", "passive", "distant", "vague"], synonym: "preventive", antonym: "reactive" },
+          { word: "accountable", clue: "responsible for actions or results", sentence: "Each owner is ___ for one part of the plan.", choices: ["accountable", "anonymous", "fragile", "casual"], synonym: "responsible", antonym: "unanswerable" },
+          { word: "insight", clue: "a clear and useful understanding", sentence: "Customer feedback gave us an ___ about the problem.", choices: ["insight", "expense", "routine", "boundary"], synonym: "understanding", antonym: "confusion" },
+          { word: "alignment", clue: "agreement around goals or direction", sentence: "The project moved faster once the team had ___.", choices: ["alignment", "friction", "silence", "distance"], synonym: "agreement", antonym: "misalignment" },
+          { word: "momentum", clue: "the force of steady progress", sentence: "Small wins helped the group build ___.", choices: ["momentum", "hesitation", "clutter", "contrast"], synonym: "drive", antonym: "stagnation" }
+        ]
       }
     };
 
@@ -1028,6 +1054,61 @@
             { word: "diplomatic", clue: "tactful in sensitive situations", sentence: "A ___ reply kept the discussion productive.", choices: ["diplomatic", "reckless", "literal", "urgent"], synonym: "tactful", antonym: "blunt" },
             { word: "clarify", clue: "to make easier to understand", sentence: "Could you ___ what success means for this project?", choices: ["clarify", "confuse", "delay", "decorate"], synonym: "explain", antonym: "obscure" },
             { word: "assertive", clue: "confident and direct without being rude", sentence: "An ___ request can be both firm and respectful.", choices: ["assertive", "passive", "vague", "careless"], synonym: "confident", antonym: "timid" }
+          ]
+        }
+      ],
+      teng: [
+        {
+          label: "Week 1",
+          theme: "Execution Words",
+          words: profiles.teng.words
+        },
+        {
+          label: "Week 2",
+          theme: "Leadership Words",
+          words: [
+            { word: "initiative", clue: "the ability to start useful action", sentence: "Teng showed ___ by solving the issue before it grew.", choices: ["initiative", "hesitation", "clutter", "routine"], synonym: "drive", antonym: "inaction" },
+            { word: "mentor", clue: "to guide someone with experience", sentence: "A senior teammate can ___ a newer colleague.", choices: ["mentor", "confuse", "replace", "delay"], synonym: "guide", antonym: "mislead" },
+            { word: "priorities", clue: "the things that matter most", sentence: "Clear ___ help the team decide what to do first.", choices: ["priorities", "ornaments", "excuses", "rumors"], synonym: "rankings", antonym: "distractions" },
+            { word: "resolve", clue: "firm determination", sentence: "The project required patience and ___.", choices: ["resolve", "confusion", "friction", "luxury"], synonym: "determination", antonym: "doubt" },
+            { word: "facilitate", clue: "to make a process easier", sentence: "A good agenda can ___ a productive meeting.", choices: ["facilitate", "complicate", "ignore", "repeat"], synonym: "enable", antonym: "hinder" },
+            { word: "ownership", clue: "responsibility for an outcome", sentence: "Clear ___ prevents tasks from falling through the cracks.", choices: ["ownership", "distance", "silence", "novelty"], synonym: "responsibility", antonym: "avoidance" },
+            { word: "commitment", clue: "a promise or dedication to do something", sentence: "The schedule reflected the team's ___ to quality.", choices: ["commitment", "hesitation", "shortcut", "contrast"], synonym: "dedication", antonym: "indifference" },
+            { word: "empower", clue: "to give someone confidence or authority", sentence: "Good tools can ___ people to do better work.", choices: ["empower", "restrict", "confuse", "weaken"], synonym: "enable", antonym: "limit" },
+            { word: "integrity", clue: "honesty and strong principles", sentence: "Trust grows when actions show ___.", choices: ["integrity", "speed", "volume", "routine"], synonym: "honesty", antonym: "dishonesty" },
+            { word: "stewardship", clue: "careful responsibility for something valuable", sentence: "Budget ___ means spending thoughtfully.", choices: ["stewardship", "carelessness", "pressure", "habit"], synonym: "care", antonym: "neglect" }
+          ]
+        },
+        {
+          label: "Week 3",
+          theme: "Analytical Words",
+          words: [
+            { word: "diagnose", clue: "to identify the cause of a problem", sentence: "We need to ___ the issue before changing the process.", choices: ["diagnose", "decorate", "postpone", "celebrate"], synonym: "identify", antonym: "misread" },
+            { word: "hypothesis", clue: "a testable explanation", sentence: "The data supported our original ___.", choices: ["hypothesis", "receipt", "shortcut", "calendar"], synonym: "theory", antonym: "certainty" },
+            { word: "correlate", clue: "to have a relationship or connection", sentence: "Higher practice time may ___ with stronger results.", choices: ["correlate", "vanish", "argue", "decorate"], synonym: "connect", antonym: "disconnect" },
+            { word: "benchmark", clue: "a standard used for comparison", sentence: "Last quarter's numbers became the ___ for progress.", choices: ["benchmark", "mistake", "rumor", "pause"], synonym: "standard", antonym: "outlier" },
+            { word: "validate", clue: "to confirm that something is true or useful", sentence: "A small test can ___ the idea before we invest more.", choices: ["validate", "dismiss", "obscure", "interrupt"], synonym: "confirm", antonym: "disprove" },
+            { word: "infer", clue: "to conclude from evidence", sentence: "From the pattern, we can ___ that demand is rising.", choices: ["infer", "deny", "borrow", "polish"], synonym: "deduce", antonym: "guess blindly" },
+            { word: "optimize", clue: "to make as effective as possible", sentence: "We can ___ the route to reduce travel time.", choices: ["optimize", "complicate", "forget", "soften"], synonym: "improve", antonym: "worsen" },
+            { word: "variable", clue: "a factor that can change", sentence: "Weather was the biggest ___ in the delivery plan.", choices: ["variable", "constant", "habit", "reward"], synonym: "factor", antonym: "constant" },
+            { word: "projection", clue: "an estimate about the future", sentence: "The sales ___ changed after the new data arrived.", choices: ["projection", "memory", "surface", "promise"], synonym: "forecast", antonym: "record" },
+            { word: "rationale", clue: "the reason behind a decision", sentence: "Please explain the ___ for choosing this option.", choices: ["rationale", "decoration", "volume", "habit"], synonym: "reasoning", antonym: "impulse" }
+          ]
+        },
+        {
+          label: "Week 4",
+          theme: "Relationship Words",
+          words: [
+            { word: "rapport", clue: "a friendly, trusting connection", sentence: "Regular check-ins helped build ___ with the team.", choices: ["rapport", "distance", "noise", "pressure"], synonym: "connection", antonym: "tension" },
+            { word: "reciprocal", clue: "shared or given by both sides", sentence: "Trust is strongest when respect is ___.", choices: ["reciprocal", "uneven", "silent", "fragile"], synonym: "mutual", antonym: "one-sided" },
+            { word: "collaborate", clue: "to work together", sentence: "The two groups will ___ on the proposal.", choices: ["collaborate", "compete", "isolate", "hesitate"], synonym: "cooperate", antonym: "separate" },
+            { word: "negotiate", clue: "to discuss in order to reach agreement", sentence: "They had to ___ the timeline with the vendor.", choices: ["negotiate", "ignore", "rush", "conceal"], synonym: "discuss", antonym: "dictate" },
+            { word: "reliable", clue: "able to be trusted consistently", sentence: "A ___ process produces fewer surprises.", choices: ["reliable", "random", "careless", "temporary"], synonym: "dependable", antonym: "unreliable" },
+            { word: "considerate", clue: "thoughtful about others", sentence: "A ___ message respects the reader's time.", choices: ["considerate", "abrupt", "vague", "selfish"], synonym: "thoughtful", antonym: "thoughtless" },
+            { word: "boundary", clue: "a clear limit", sentence: "A healthy ___ protects family time.", choices: ["boundary", "shortcut", "reward", "volume"], synonym: "limit", antonym: "openness" },
+            { word: "reassure", clue: "to give comfort or confidence", sentence: "A clear plan can ___ people during change.", choices: ["reassure", "alarm", "confuse", "interrupt"], synonym: "comfort", antonym: "worry" },
+            { word: "mediate", clue: "to help resolve disagreement", sentence: "A neutral person can ___ a difficult discussion.", choices: ["mediate", "inflame", "avoid", "repeat"], synonym: "arbitrate", antonym: "provoke" },
+            { word: "appreciate", clue: "to recognize value or feel thankful", sentence: "It is important to ___ effort, not just results.", choices: ["appreciate", "dismiss", "conceal", "delay"], synonym: "value", antonym: "disregard" }
           ]
         }
       ]

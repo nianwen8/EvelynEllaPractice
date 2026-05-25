@@ -1,6 +1,6 @@
 # EvelynEllaPractice
 
-A static vocabulary practice website for Evelyn Gu, Ella Gu, and Nianwen.
+A static vocabulary practice website for Evelyn Gu, Ella Gu, Nianwen, and Teng.
 
 ## Live Site
 
