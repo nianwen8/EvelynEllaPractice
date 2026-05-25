@@ -1,0 +1,9 @@
+{
+  "name": "vocabulary-fun-practice",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "python3 -m http.server 4173",
+    "deploy": "node scripts/deploy-vercel.mjs"
+  }
+}
