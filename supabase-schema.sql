@@ -10,11 +10,15 @@ create table if not exists public.practice_progress (
   correct integer not null default 0,
   current_index integer not null default 0,
   completed jsonb not null default '{}'::jsonb,
+  recent_answers jsonb not null default '[]'::jsonb,
   saved_to text not null default 'Supabase',
   last_practiced_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   primary key (family_id, learner, week_key, mode)
 );
+
+alter table public.practice_progress
+add column if not exists recent_answers jsonb not null default '[]'::jsonb;
 
 alter table public.practice_progress enable row level security;
 

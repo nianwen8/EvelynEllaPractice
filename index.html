@@ -784,7 +784,7 @@
           <div class="activity-footer">
             <div class="mini"><span>Parent Prompt</span><strong id="parentPrompt">Ask Evelyn to explain why the chosen word fits the sentence.</strong></div>
             <div class="mini"><span>Writing Boost</span><strong id="writingBoost">Write a new sentence with the same vocabulary word.</strong></div>
-            <div class="mini"><span>Bonus</span><strong id="bonusPrompt">Name a synonym or antonym.</strong></div>
+            <div class="mini"><span>Last Answer</span><strong id="lastAnswer">No answers yet.</strong></div>
           </div>
         </section>
       </article>
@@ -988,7 +988,8 @@
 
     const storageKeys = {
       config: "vocabPracticeSupabaseConfig",
-      progress: "vocabPracticeProgress"
+      progress: "vocabPracticeProgress",
+      session: "vocabPracticeSession"
     };
 
     function defaultWeekIndex() {
@@ -998,14 +999,18 @@
       return Math.floor(dayOffset / 7) % 4;
     }
 
+    const savedSession = loadSession();
+
     const state = {
-      profile: "evelyn",
-      mode: "choice",
-      week: defaultWeekIndex(),
+      profile: savedSession.profile || "evelyn",
+      mode: savedSession.mode || "choice",
+      week: Number.isInteger(savedSession.week) ? savedSession.week : defaultWeekIndex(),
       index: 0,
       stars: 0,
       attempts: 0,
       correct: 0,
+      recentAnswers: [],
+      lastAnswer: null,
       selected: "",
       built: "",
       checked: false,
@@ -1044,7 +1049,7 @@
       progressSaved: document.querySelector("#progressSaved"),
       parentPrompt: document.querySelector("#parentPrompt"),
       writingBoost: document.querySelector("#writingBoost"),
-      bonusPrompt: document.querySelector("#bonusPrompt")
+      lastAnswer: document.querySelector("#lastAnswer")
     };
 
     function loadConfig() {
@@ -1057,6 +1062,22 @@
       } catch {
         return { familyId: "gu-family", supabaseUrl: "", supabaseAnonKey: "" };
       }
+    }
+
+    function loadSession() {
+      try {
+        return JSON.parse(localStorage.getItem(storageKeys.session)) || {};
+      } catch {
+        return {};
+      }
+    }
+
+    function saveSession() {
+      localStorage.setItem(storageKeys.session, JSON.stringify({
+        profile: state.profile,
+        mode: state.mode,
+        week: state.week
+      }));
     }
 
     function currentProfile() {
@@ -1103,6 +1124,8 @@
         state.stars = 0;
         state.attempts = 0;
         state.correct = 0;
+        state.recentAnswers = [];
+        state.lastAnswer = null;
         state.index = 0;
         state.savedTo = hasSupabaseConfig() ? "Supabase ready" : "Local";
         return;
@@ -1111,10 +1134,15 @@
       state.attempts = Number(row.attempts || 0);
       state.correct = Number(row.correct || 0);
       state.index = Number(row.current_index || 0) % currentWords().length;
+      state.recentAnswers = Array.isArray(row.recent_answers) ? row.recent_answers : [];
+      state.lastAnswer = state.recentAnswers[0] || row.completed || null;
       state.savedTo = row.saved_to || "Local";
     }
 
-    function currentProgressRow() {
+    function currentProgressRow(answerRecord = null) {
+      const recentAnswers = answerRecord
+        ? [answerRecord, ...state.recentAnswers.filter((answer) => answer.answer_id !== answerRecord.answer_id)].slice(0, 20)
+        : state.recentAnswers.slice(0, 20);
       return {
         family_id: state.config.familyId || "gu-family",
         learner: state.profile,
@@ -1126,10 +1154,8 @@
         attempts: state.attempts,
         correct: state.correct,
         current_index: state.index,
-        completed: {
-          word: currentWord().word,
-          savedAt: new Date().toISOString()
-        },
+        completed: answerRecord || state.lastAnswer || {},
+        recent_answers: recentAnswers,
         saved_to: state.savedTo,
         last_practiced_at: new Date().toISOString()
       };
@@ -1143,10 +1169,65 @@
       el.syncStatus.textContent = text;
     }
 
-    async function saveProgress() {
-      const row = currentProgressRow();
+    function supabaseHeaders(extra = {}) {
+      return {
+        apikey: state.config.supabaseAnonKey,
+        Authorization: `Bearer ${state.config.supabaseAnonKey}`,
+        ...extra
+      };
+    }
+
+    function supabaseBaseUrl() {
+      return state.config.supabaseUrl.replace(/\/$/, "");
+    }
+
+    async function loadProgress() {
+      const localRow = loadLocalProgress();
+      applyProgress(localRow);
+      updateChrome();
+
+      if (!hasSupabaseConfig()) {
+        updateSyncStatus("Progress loaded from this browser. Add Supabase settings to pull online progress.");
+        return;
+      }
+
+      updateSyncStatus("Loading saved progress from Supabase...");
+      try {
+        const params = new URLSearchParams({
+          family_id: `eq.${state.config.familyId || "gu-family"}`,
+          learner: `eq.${state.profile}`,
+          week_key: `eq.${currentWeekKey()}`,
+          mode: `eq.${state.mode}`,
+          select: "*",
+          limit: "1"
+        });
+        const response = await fetch(`${supabaseBaseUrl()}/rest/v1/practice_progress?${params}`, {
+          headers: supabaseHeaders()
+        });
+
+        if (!response.ok) throw new Error(`Supabase returned ${response.status}`);
+        const rows = await response.json();
+        if (rows[0]) {
+          applyProgress({ ...rows[0], saved_to: "Supabase" });
+          saveLocalProgress({ ...rows[0], saved_to: "Supabase" });
+          updateSyncStatus("Progress loaded from Supabase.");
+        } else {
+          updateSyncStatus("No Supabase progress yet for this learner, week, and mode.");
+        }
+      } catch (error) {
+        applyProgress(localRow);
+        updateSyncStatus(`Could not load Supabase progress. Using local progress. ${error.message}`);
+      } finally {
+        updateChrome();
+      }
+    }
+
+    async function saveProgress(answerRecord = null) {
+      const row = currentProgressRow(answerRecord);
       row.saved_to = "Local";
       saveLocalProgress(row);
+      state.recentAnswers = row.recent_answers;
+      state.lastAnswer = row.completed;
       state.savedTo = "Local";
       updateChrome();
 
@@ -1158,19 +1239,22 @@
       state.syncing = true;
       updateSyncStatus("Saving progress to Supabase...");
       try {
-        const baseUrl = state.config.supabaseUrl.replace(/\/$/, "");
-        const response = await fetch(`${baseUrl}/rest/v1/practice_progress?on_conflict=family_id,learner,week_key,mode`, {
+        const response = await fetch(`${supabaseBaseUrl()}/rest/v1/practice_progress?on_conflict=family_id,learner,week_key,mode`, {
           method: "POST",
-          headers: {
-            apikey: state.config.supabaseAnonKey,
-            Authorization: `Bearer ${state.config.supabaseAnonKey}`,
+          headers: supabaseHeaders({
             "Content-Type": "application/json",
             Prefer: "resolution=merge-duplicates,return=representation"
-          },
+          }),
           body: JSON.stringify({ ...row, saved_to: "Supabase" })
         });
 
         if (!response.ok) throw new Error(`Supabase returned ${response.status}`);
+        const rows = await response.json();
+        if (rows[0]) {
+          state.recentAnswers = Array.isArray(rows[0].recent_answers) ? rows[0].recent_answers : row.recent_answers;
+          state.lastAnswer = state.recentAnswers[0] || rows[0].completed || row.completed;
+          saveLocalProgress({ ...rows[0], saved_to: "Supabase" });
+        }
         state.savedTo = "Supabase";
         updateSyncStatus("Progress saved to Supabase.");
       } catch (error) {
@@ -1206,7 +1290,6 @@
       el.roundPill.textContent = `${currentWeek().label} · Round ${(state.index % words.length) + 1}`;
       el.parentPrompt.textContent = profile.parentPrompt;
       el.writingBoost.textContent = profile.writingBoost;
-      el.bonusPrompt.textContent = profile.bonusPrompt;
       el.wordBank.innerHTML = words.map((item) => `<span class="chip">${item.word}</span>`).join("");
       el.familyId.value = state.config.familyId || "";
       el.supabaseUrl.value = state.config.supabaseUrl || "";
@@ -1215,6 +1298,9 @@
       el.progressCorrect.textContent = state.correct;
       el.progressAccuracy.textContent = state.attempts ? `${Math.round((state.correct / state.attempts) * 100)}%` : "0%";
       el.progressSaved.textContent = state.savedTo;
+      el.lastAnswer.textContent = state.lastAnswer && state.lastAnswer.word
+        ? `${state.lastAnswer.word}: ${state.lastAnswer.answer || "(blank)"} · ${state.lastAnswer.correct ? "correct" : "try again"}`
+        : "No answers yet.";
 
       [...el.profiles.children].forEach((button) => {
         button.setAttribute("aria-pressed", button.dataset.profile === state.profile);
@@ -1328,6 +1414,31 @@
         : `Try again. Look for the word that means ${item.clue}.`;
     }
 
+    function answerValue(item, ok) {
+      if (state.mode === "completion") return state.built || "";
+      if (state.mode === "sentence") return state.selected || "";
+      return state.selected || "";
+    }
+
+    function makeAnswerRecord(item, ok) {
+      const answeredAt = new Date().toISOString();
+      return {
+        answer_id: `${state.profile}-${currentWeekKey()}-${state.mode}-${state.index}-${answeredAt}`,
+        answered_at: answeredAt,
+        learner: state.profile,
+        week_key: currentWeekKey(),
+        week_label: currentWeek().label,
+        mode: state.mode,
+        round: (state.index % currentWords().length) + 1,
+        word: item.word,
+        clue: item.clue,
+        prompt: item.sentence,
+        answer: answerValue(item, ok),
+        expected: state.mode === "meaning" ? item.clue : item.word,
+        correct: ok
+      };
+    }
+
     async function checkAnswer() {
       const item = currentWord();
       let ok = false;
@@ -1341,17 +1452,19 @@
       }
 
       state.checked = true;
+      const answerRecord = makeAnswerRecord(item, ok);
       if (!state.awarded) state.attempts += 1;
       if (ok && !state.awarded) {
         state.stars += 1;
         state.correct += 1;
         state.awarded = true;
       }
+      state.lastAnswer = answerRecord;
       setFeedback(ok, item);
       if (state.mode === "choice") renderChoice();
       if (state.mode === "meaning") renderMeaning();
       updateChrome();
-      await saveProgress();
+      await saveProgress(answerRecord);
     }
 
     function nextQuestion() {
@@ -1370,34 +1483,36 @@
     }
 
     buildControls();
-    applyProgress(loadLocalProgress());
-    renderQuestion();
+    loadProgress().then(renderQuestion);
 
-    el.profiles.addEventListener("click", (event) => {
+    el.profiles.addEventListener("click", async (event) => {
       const button = event.target.closest("[data-profile]");
       if (!button) return;
       state.profile = button.dataset.profile;
       state.week = Math.min(state.week, weeklySets[state.profile].length - 1);
       state.index = 0;
+      saveSession();
       buildControls();
-      applyProgress(loadLocalProgress());
+      await loadProgress();
       renderQuestion();
     });
 
-    el.modes.addEventListener("click", (event) => {
+    el.modes.addEventListener("click", async (event) => {
       const button = event.target.closest("[data-mode]");
       if (!button) return;
       state.mode = button.dataset.mode;
-      applyProgress(loadLocalProgress());
+      saveSession();
+      await loadProgress();
       renderQuestion();
     });
 
-    el.weeks.addEventListener("click", (event) => {
+    el.weeks.addEventListener("click", async (event) => {
       const button = event.target.closest("[data-week]");
       if (!button) return;
       state.week = Number(button.dataset.week);
       state.index = 0;
-      applyProgress(loadLocalProgress());
+      saveSession();
+      await loadProgress();
       renderQuestion();
     });
 
@@ -1408,7 +1523,7 @@
         supabaseAnonKey: el.supabaseAnonKey.value.trim()
       };
       localStorage.setItem(storageKeys.config, JSON.stringify(state.config));
-      applyProgress(loadLocalProgress());
+      await loadProgress();
       updateChrome();
       await saveProgress();
     });

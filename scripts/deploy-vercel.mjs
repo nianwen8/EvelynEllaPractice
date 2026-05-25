@@ -12,7 +12,7 @@ if (!token) {
 }
 
 const root = new URL("..", import.meta.url);
-const fileNames = ["index.html", "package.json", "vercel.json", "README.md"];
+const fileNames = ["index.html", "package.json", "vercel.json", "README.md", "supabase-schema.sql"];
 
 const files = await Promise.all(
   fileNames.map(async (file) => ({

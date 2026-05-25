@@ -24,7 +24,7 @@ Then open the app and enter:
 - Project URL: Supabase Project Settings -> API -> Project URL
 - Anon Key: Supabase Project Settings -> API -> Project API keys -> `anon public`
 
-The app saves progress locally first, then syncs rows into the `practice_progress` table when Supabase settings are present.
+The app loads existing progress from Supabase when settings are present. Each checked answer saves the current stats, the latest answer, and a recent answer history into the `practice_progress` table. If Supabase is unavailable, the same data is saved locally in the browser and retried on the next save.
 
 ## Deploy To Vercel With Token
 
