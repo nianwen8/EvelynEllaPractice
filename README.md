@@ -2,6 +2,10 @@
 
 A static vocabulary practice website for Evelyn Gu and Ella Gu.
 
+## Live Site
+
+https://vocabulary-fun-practice.vercel.app
+
 ## Local Preview
 
 ```sh
