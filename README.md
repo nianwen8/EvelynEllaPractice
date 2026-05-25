@@ -24,7 +24,7 @@ Then open the app and enter:
 - Project URL: `https://zfvdwqhoitknxnxdwste.supabase.co` is prefilled
 - Anon Key: Supabase Project Settings -> API -> Project API keys -> `anon public`
 
-The app loads existing progress from Supabase when settings are present. Each checked answer saves `total_attempts`, `correct`, `accuracy_percent`, `previous_answer`, and `recent_answers` into the `practice_progress` table. If Supabase is unavailable, the same data is saved locally in the browser and retried on the next save.
+The app loads existing progress from Supabase when settings are present. Each checked answer saves `total_attempts`, `correct`, `accuracy_percent`, `previous_answer`, `recent_answers`, and `family_board` into the `practice_progress` table. If Supabase is unavailable, the same data is saved locally in the browser and retried on the next save.
 
 Do not put the Supabase `service_role` key into the app. Use only the `anon public` key in browser settings.
 

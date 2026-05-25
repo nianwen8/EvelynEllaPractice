@@ -1205,6 +1205,7 @@
       correct: 0,
       recentAnswers: [],
       lastAnswer: null,
+      boardRows: [],
       selected: "",
       built: "",
       checked: false,
@@ -1323,13 +1324,14 @@
       }
     }
 
-    function familyBoardRows() {
+    function familyBoardRows(progressOverride = null) {
       const totals = Object.fromEntries(Object.entries(profiles).map(([key, profile]) => [
         key,
         { key, name: profile.short, stars: 0, attempts: 0, correct: 0 }
       ]));
 
-      Object.values(loadAllLocalProgress()).forEach((row) => {
+      const progressRows = progressOverride ? Object.values(progressOverride) : Object.values(loadAllLocalProgress());
+      progressRows.forEach((row) => {
         if (!row || !totals[row.learner]) return;
         totals[row.learner].stars += Number(row.stars || 0);
         totals[row.learner].attempts += Number(row.total_attempts ?? row.attempts ?? 0);
@@ -1344,8 +1346,19 @@
         .sort((a, b) => b.stars - a.stars || b.accuracy - a.accuracy || b.correct - a.correct || a.name.localeCompare(b.name));
     }
 
+    function applyBoardRowsFromProgress(rows) {
+      const all = loadAllLocalProgress();
+      rows.forEach((row) => {
+        if (!row || !row.learner || !row.week_key || !row.mode) return;
+        const key = `${row.family_id || state.config.familyId || "gu-family"}:${row.learner}:${row.week_key}:${row.mode}`;
+        all[key] = { ...row, saved_to: "Supabase" };
+      });
+      localStorage.setItem(storageKeys.progress, JSON.stringify(all));
+      state.boardRows = familyBoardRows();
+    }
+
     function renderLeaderboard() {
-      const rows = familyBoardRows();
+      const rows = state.boardRows.length ? state.boardRows : familyBoardRows();
       const totalAttempts = rows.reduce((sum, row) => sum + row.attempts, 0);
       const totalStars = rows.reduce((sum, row) => sum + row.stars, 0);
       el.boardSummary.textContent = `${totalStars} stars · ${totalAttempts} attempts`;
@@ -1386,7 +1399,7 @@
         : state.recentAnswers.slice(0, 20);
       const previousAnswer = answerRecord || state.lastAnswer || recentAnswers[0] || {};
       const accuracyPercent = state.attempts ? Math.round((state.correct / state.attempts) * 100) : 0;
-      return {
+      const row = {
         family_id: state.config.familyId || "gu-family",
         learner: state.profile,
         week_key: currentWeekKey(),
@@ -1402,9 +1415,13 @@
         completed: previousAnswer,
         previous_answer: previousAnswer,
         recent_answers: recentAnswers,
+        family_board: familyBoard,
         saved_to: state.savedTo,
         last_practiced_at: new Date().toISOString()
       };
+      const progressWithCurrentRow = { ...loadAllLocalProgress(), [progressKey()]: row };
+      row.family_board = familyBoardRows(progressWithCurrentRow);
+      return row;
     }
 
     function hasSupabaseConfig() {
@@ -1434,11 +1451,24 @@
 
       if (!hasSupabaseConfig()) {
         updateSyncStatus("Progress loaded from this browser. Add Supabase settings to pull online progress.");
+        state.boardRows = familyBoardRows();
         return;
       }
 
       updateSyncStatus("Loading saved progress from Supabase...");
       try {
+        const boardParams = new URLSearchParams({
+          family_id: `eq.${state.config.familyId || "gu-family"}`,
+          select: "*"
+        });
+        const boardResponse = await fetch(`${supabaseBaseUrl()}/rest/v1/practice_progress?${boardParams}`, {
+          headers: supabaseHeaders()
+        });
+
+        if (boardResponse.status === 404) throw new Error("practice_progress table not found. Run supabase-schema.sql in Supabase SQL Editor.");
+        if (!boardResponse.ok) throw new Error(`Supabase returned ${boardResponse.status}`);
+        applyBoardRowsFromProgress(await boardResponse.json());
+
         const params = new URLSearchParams({
           family_id: `eq.${state.config.familyId || "gu-family"}`,
           learner: `eq.${state.profile}`,
@@ -1463,6 +1493,7 @@
         }
       } catch (error) {
         applyProgress(localRow);
+        state.boardRows = familyBoardRows();
         updateSyncStatus(`Could not load Supabase progress. Using local progress. ${error.message}`);
       } finally {
         updateChrome();
@@ -1475,6 +1506,7 @@
       saveLocalProgress(row);
       state.recentAnswers = row.recent_answers;
       state.lastAnswer = row.completed;
+      state.boardRows = familyBoardRows();
       state.savedTo = "Local";
       updateChrome();
 
@@ -1502,6 +1534,7 @@
           state.recentAnswers = Array.isArray(rows[0].recent_answers) ? rows[0].recent_answers : row.recent_answers;
           state.lastAnswer = rows[0].previous_answer || state.recentAnswers[0] || rows[0].completed || row.completed;
           saveLocalProgress({ ...rows[0], saved_to: "Supabase" });
+          state.boardRows = Array.isArray(rows[0].family_board) ? rows[0].family_board : familyBoardRows();
         }
         state.savedTo = "Supabase";
         updateSyncStatus("Progress saved to Supabase.");
