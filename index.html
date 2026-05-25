@@ -1301,11 +1301,11 @@
         return;
       }
       state.stars = Number(row.stars || 0);
-      state.attempts = Number(row.attempts || 0);
+      state.attempts = Number(row.total_attempts ?? row.attempts ?? 0);
       state.correct = Number(row.correct || 0);
       state.index = Number(row.current_index || 0) % currentWords().length;
       state.recentAnswers = Array.isArray(row.recent_answers) ? row.recent_answers : [];
-      state.lastAnswer = state.recentAnswers[0] || row.completed || null;
+      state.lastAnswer = row.previous_answer || state.recentAnswers[0] || row.completed || null;
       state.savedTo = row.saved_to || "Local";
     }
 
@@ -1313,6 +1313,8 @@
       const recentAnswers = answerRecord
         ? [answerRecord, ...state.recentAnswers.filter((answer) => answer.answer_id !== answerRecord.answer_id)].slice(0, 20)
         : state.recentAnswers.slice(0, 20);
+      const previousAnswer = answerRecord || state.lastAnswer || recentAnswers[0] || {};
+      const accuracyPercent = state.attempts ? Math.round((state.correct / state.attempts) * 100) : 0;
       return {
         family_id: state.config.familyId || "gu-family",
         learner: state.profile,
@@ -1322,9 +1324,12 @@
         mode: state.mode,
         stars: state.stars,
         attempts: state.attempts,
+        total_attempts: state.attempts,
         correct: state.correct,
+        accuracy_percent: accuracyPercent,
         current_index: state.index,
-        completed: answerRecord || state.lastAnswer || {},
+        completed: previousAnswer,
+        previous_answer: previousAnswer,
         recent_answers: recentAnswers,
         saved_to: state.savedTo,
         last_practiced_at: new Date().toISOString()
@@ -1422,7 +1427,7 @@
         const rows = await response.json();
         if (rows[0]) {
           state.recentAnswers = Array.isArray(rows[0].recent_answers) ? rows[0].recent_answers : row.recent_answers;
-          state.lastAnswer = state.recentAnswers[0] || rows[0].completed || row.completed;
+          state.lastAnswer = rows[0].previous_answer || state.recentAnswers[0] || rows[0].completed || row.completed;
           saveLocalProgress({ ...rows[0], saved_to: "Supabase" });
         }
         state.savedTo = "Supabase";

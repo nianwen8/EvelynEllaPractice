@@ -7,9 +7,12 @@ create table if not exists public.practice_progress (
   mode text not null,
   stars integer not null default 0,
   attempts integer not null default 0,
+  total_attempts integer not null default 0,
   correct integer not null default 0,
+  accuracy_percent integer not null default 0,
   current_index integer not null default 0,
   completed jsonb not null default '{}'::jsonb,
+  previous_answer jsonb not null default '{}'::jsonb,
   recent_answers jsonb not null default '[]'::jsonb,
   saved_to text not null default 'Supabase',
   last_practiced_at timestamptz not null default now(),
@@ -19,6 +22,15 @@ create table if not exists public.practice_progress (
 
 alter table public.practice_progress
 add column if not exists recent_answers jsonb not null default '[]'::jsonb;
+
+alter table public.practice_progress
+add column if not exists total_attempts integer not null default 0;
+
+alter table public.practice_progress
+add column if not exists accuracy_percent integer not null default 0;
+
+alter table public.practice_progress
+add column if not exists previous_answer jsonb not null default '{}'::jsonb;
 
 alter table public.practice_progress enable row level security;
 
