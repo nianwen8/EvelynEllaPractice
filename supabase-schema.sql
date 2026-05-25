@@ -38,24 +38,27 @@ add column if not exists family_board jsonb not null default '[]'::jsonb;
 
 alter table public.practice_progress enable row level security;
 
+drop policy if exists "practice_progress_anon_select" on public.practice_progress;
 create policy "practice_progress_anon_select"
 on public.practice_progress
 for select
 to anon
-using (true);
+using (family_id = 'gu-family');
 
+drop policy if exists "practice_progress_anon_insert" on public.practice_progress;
 create policy "practice_progress_anon_insert"
 on public.practice_progress
 for insert
 to anon
-with check (true);
+with check (family_id = 'gu-family');
 
+drop policy if exists "practice_progress_anon_update" on public.practice_progress;
 create policy "practice_progress_anon_update"
 on public.practice_progress
 for update
 to anon
-using (true)
-with check (true);
+using (family_id = 'gu-family')
+with check (family_id = 'gu-family');
 
 create or replace function public.set_practice_progress_updated_at()
 returns trigger
