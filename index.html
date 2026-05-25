@@ -190,6 +190,10 @@
       background: var(--rose);
     }
 
+    .nianwen {
+      background: var(--teal);
+    }
+
     .mode-icon {
       width: 34px;
       height: 34px;
@@ -679,7 +683,7 @@
         </svg>
         <div>
           <h1>Vocabulary Fun Practice</h1>
-          <p class="subtitle">Word completion, word choice, spelling, and sentence power for Evelyn and Ella.</p>
+          <p class="subtitle">Word completion, word choice, spelling, and sentence power for Evelyn, Ella, and Nianwen.</p>
         </div>
       </div>
       <div class="score-strip" aria-label="Practice score">
@@ -836,6 +840,28 @@
           { word: "brave", clue: "not afraid to try", sentence: "The ___ girl tried the tall slide.", choices: ["brave", "messy", "blue", "quiet"], synonym: "bold", antonym: "scared" },
           { word: "clean", clue: "not dirty", sentence: "We washed the cup until it was ___.", choices: ["clean", "sour", "late", "round"], synonym: "neat", antonym: "dirty" }
         ]
+      },
+      nianwen: {
+        name: "Nianwen",
+        short: "Nianwen",
+        grade: "Adult",
+        initials: "NW",
+        colorClass: "nianwen",
+        parentPrompt: "Explain the nuance of the word, then use it in a real-life sentence.",
+        writingBoost: "Write one polished sentence using the word in a professional or reflective context.",
+        bonusPrompt: "Name a near-synonym and explain the difference.",
+        words: [
+          { word: "pragmatic", clue: "focused on practical results", sentence: "The team chose a ___ plan that could be finished by Friday.", choices: ["pragmatic", "ornate", "timid", "abstract"], synonym: "practical", antonym: "idealistic" },
+          { word: "resilient", clue: "able to recover after difficulty", sentence: "A ___ system keeps working even when one part fails.", choices: ["resilient", "fragile", "passive", "minor"], synonym: "adaptable", antonym: "brittle" },
+          { word: "nuance", clue: "a small but meaningful difference", sentence: "The translation missed the ___ in her original sentence.", choices: ["nuance", "routine", "shortcut", "volume"], synonym: "subtlety", antonym: "obviousness" },
+          { word: "prioritize", clue: "to decide what matters most", sentence: "We need to ___ the tasks that unblock the launch.", choices: ["prioritize", "decorate", "postpone", "duplicate"], synonym: "rank", antonym: "neglect" },
+          { word: "coherent", clue: "clear and logically connected", sentence: "The proposal became more ___ after the outline was revised.", choices: ["coherent", "random", "silent", "temporary"], synonym: "logical", antonym: "confusing" },
+          { word: "iterate", clue: "to improve through repeated versions", sentence: "Designers often ___ after getting user feedback.", choices: ["iterate", "vanish", "hesitate", "scatter"], synonym: "refine", antonym: "finalize" },
+          { word: "discern", clue: "to notice or understand something not obvious", sentence: "It took time to ___ the real cause of the delay.", choices: ["discern", "conceal", "wander", "inflate"], synonym: "detect", antonym: "miss" },
+          { word: "concise", clue: "using few words clearly", sentence: "A ___ update is easier for busy readers to understand.", choices: ["concise", "verbose", "vague", "ancient"], synonym: "brief", antonym: "wordy" },
+          { word: "credible", clue: "able to be believed or trusted", sentence: "The report was more ___ after sources were added.", choices: ["credible", "careless", "fictional", "hollow"], synonym: "trustworthy", antonym: "unreliable" },
+          { word: "synthesize", clue: "to combine ideas into a useful whole", sentence: "She had to ___ notes from three meetings into one summary.", choices: ["synthesize", "separate", "erase", "distract"], synonym: "combine", antonym: "divide" }
+        ]
       }
     };
 
@@ -947,6 +973,61 @@
             { word: "answer", clue: "a reply to a question", sentence: "Raise your hand if you know the ___.", choices: ["answer", "button", "sand", "cup"], synonym: "reply", antonym: "question" },
             { word: "class", clue: "a group of students", sentence: "Our ___ made a card together.", choices: ["class", "beach", "moon", "rope"], synonym: "group", antonym: "alone" },
             { word: "read", clue: "to look at words and understand them", sentence: "I like to ___ books about animals.", choices: ["read", "kick", "stir", "sleep"], synonym: "study", antonym: "ignore" }
+          ]
+        }
+      ],
+      nianwen: [
+        {
+          label: "Week 1",
+          theme: "Practical Clarity",
+          words: profiles.nianwen.words
+        },
+        {
+          label: "Week 2",
+          theme: "Decision Words",
+          words: [
+            { word: "tradeoff", clue: "a balance where gaining one thing means giving up another", sentence: "Choosing speed over polish was a deliberate ___.", choices: ["tradeoff", "shortcut", "deadline", "routine"], synonym: "compromise", antonym: "free gain" },
+            { word: "constraint", clue: "a limit that shapes what is possible", sentence: "Budget was the main ___ for the project.", choices: ["constraint", "luxury", "detail", "reward"], synonym: "limit", antonym: "freedom" },
+            { word: "leverage", clue: "to use something for greater effect", sentence: "We can ___ existing tools instead of building everything again.", choices: ["leverage", "ignore", "delay", "soften"], synonym: "use", antonym: "waste" },
+            { word: "calibrate", clue: "to adjust carefully for accuracy", sentence: "The team had to ___ expectations before the review.", choices: ["calibrate", "dismiss", "repeat", "decorate"], synonym: "adjust", antonym: "misalign" },
+            { word: "robust", clue: "strong and reliable in many conditions", sentence: "A ___ plan still works when assumptions change.", choices: ["robust", "fragile", "vague", "hasty"], synonym: "sturdy", antonym: "weak" },
+            { word: "mitigate", clue: "to reduce harm or risk", sentence: "The backup process helped ___ data-loss risk.", choices: ["mitigate", "amplify", "conceal", "imitate"], synonym: "reduce", antonym: "worsen" },
+            { word: "ambiguous", clue: "having more than one possible meaning", sentence: "The requirement was too ___ to implement confidently.", choices: ["ambiguous", "precise", "durable", "modest"], synonym: "unclear", antonym: "clear" },
+            { word: "viable", clue: "able to work successfully", sentence: "After testing, the smaller design looked ___ for launch.", choices: ["viable", "decorative", "reckless", "obsolete"], synonym: "workable", antonym: "impossible" },
+            { word: "escalate", clue: "to raise an issue to a higher level", sentence: "We should ___ the blocker before it affects the timeline.", choices: ["escalate", "minimize", "archive", "polish"], synonym: "elevate", antonym: "defer" },
+            { word: "consensus", clue: "general agreement among a group", sentence: "The meeting ended with ___ on the next milestone.", choices: ["consensus", "confusion", "silence", "friction"], synonym: "agreement", antonym: "disagreement" }
+          ]
+        },
+        {
+          label: "Week 3",
+          theme: "Reflective Words",
+          words: [
+            { word: "intentional", clue: "done with purpose", sentence: "A more ___ morning routine made the day calmer.", choices: ["intentional", "accidental", "ordinary", "restless"], synonym: "deliberate", antonym: "accidental" },
+            { word: "perspective", clue: "a way of seeing or understanding something", sentence: "Travel can change a person's ___.", choices: ["perspective", "schedule", "surface", "inventory"], synonym: "viewpoint", antonym: "blindness" },
+            { word: "resonates", clue: "feels meaningful or personally relevant", sentence: "That advice ___ because it matches my experience.", choices: ["resonates", "evaporates", "complicates", "interrupts"], synonym: "connects", antonym: "alienates" },
+            { word: "gratitude", clue: "thankful appreciation", sentence: "Daily ___ can make small moments feel more visible.", choices: ["gratitude", "urgency", "fatigue", "friction"], synonym: "thankfulness", antonym: "resentment" },
+            { word: "composure", clue: "calm control of feelings", sentence: "She kept her ___ during the difficult conversation.", choices: ["composure", "momentum", "volume", "curiosity"], synonym: "calm", antonym: "panic" },
+            { word: "authentic", clue: "genuine and true to itself", sentence: "The speech felt ___ because it included a personal story.", choices: ["authentic", "artificial", "distant", "minor"], synonym: "genuine", antonym: "fake" },
+            { word: "mindful", clue: "aware and attentive in the moment", sentence: "A ___ pause helped him respond instead of react.", choices: ["mindful", "careless", "random", "rigid"], synonym: "aware", antonym: "mindless" },
+            { word: "equanimity", clue: "mental calm during stress", sentence: "The leader handled the setback with ___.", choices: ["equanimity", "confusion", "luxury", "novelty"], synonym: "poise", antonym: "agitation" },
+            { word: "aspiration", clue: "a strong hope or goal", sentence: "Her long-term ___ was to build products that help families.", choices: ["aspiration", "hesitation", "boundary", "receipt"], synonym: "ambition", antonym: "apathy" },
+            { word: "disciplined", clue: "controlled and consistent", sentence: "A ___ practice habit leads to steady improvement.", choices: ["disciplined", "scattered", "careless", "familiar"], synonym: "controlled", antonym: "undisciplined" }
+          ]
+        },
+        {
+          label: "Week 4",
+          theme: "Communication Words",
+          words: [
+            { word: "articulate", clue: "to express clearly", sentence: "It helps to ___ the problem before choosing a solution.", choices: ["articulate", "obscure", "rush", "borrow"], synonym: "express", antonym: "mumble" },
+            { word: "empathetic", clue: "able to understand another person's feelings", sentence: "An ___ response can lower tension in a hard conversation.", choices: ["empathetic", "dismissive", "abrupt", "formal"], synonym: "understanding", antonym: "indifferent" },
+            { word: "succinct", clue: "brief and clearly expressed", sentence: "The executive summary should be ___.", choices: ["succinct", "rambling", "ornate", "uncertain"], synonym: "concise", antonym: "long-winded" },
+            { word: "contextualize", clue: "to explain the surrounding situation", sentence: "Please ___ the data before sharing the chart.", choices: ["contextualize", "isolate", "simplify", "translate"], synonym: "frame", antonym: "detach" },
+            { word: "reconcile", clue: "to make two differences fit together", sentence: "We need to ___ the budget with the product goals.", choices: ["reconcile", "separate", "inflate", "announce"], synonym: "harmonize", antonym: "conflict" },
+            { word: "transparent", clue: "open and easy to understand", sentence: "A ___ update builds trust with the team.", choices: ["transparent", "secretive", "fragile", "casual"], synonym: "open", antonym: "opaque" },
+            { word: "constructive", clue: "helpful and aimed at improvement", sentence: "Good feedback is specific and ___.", choices: ["constructive", "hostile", "random", "passive"], synonym: "helpful", antonym: "destructive" },
+            { word: "diplomatic", clue: "tactful in sensitive situations", sentence: "A ___ reply kept the discussion productive.", choices: ["diplomatic", "reckless", "literal", "urgent"], synonym: "tactful", antonym: "blunt" },
+            { word: "clarify", clue: "to make easier to understand", sentence: "Could you ___ what success means for this project?", choices: ["clarify", "confuse", "delay", "decorate"], synonym: "explain", antonym: "obscure" },
+            { word: "assertive", clue: "confident and direct without being rude", sentence: "An ___ request can be both firm and respectful.", choices: ["assertive", "passive", "vague", "careless"], synonym: "confident", antonym: "timid" }
           ]
         }
       ]
