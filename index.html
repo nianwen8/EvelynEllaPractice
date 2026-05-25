@@ -543,6 +543,85 @@
       margin-top: 18px;
     }
 
+    .leaderboard {
+      margin-top: 18px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .board-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .board-head h4 {
+      margin: 0;
+      font-size: 1.05rem;
+      letter-spacing: 0;
+    }
+
+    .board-head span {
+      color: var(--muted);
+      font-size: .8rem;
+      font-weight: 800;
+    }
+
+    .board-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .board-row {
+      display: grid;
+      grid-template-columns: 34px minmax(86px, 1fr) repeat(3, minmax(58px, auto));
+      gap: 10px;
+      align-items: center;
+      min-height: 52px;
+      padding: 8px 10px;
+      border: 1px solid #edf1f6;
+      border-radius: 8px;
+      background: #f8fbff;
+    }
+
+    .rank {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      color: #fff;
+      background: var(--blue);
+      font-weight: 900;
+      font-size: .82rem;
+    }
+
+    .board-name strong,
+    .board-metric strong {
+      display: block;
+      font-size: .95rem;
+      line-height: 1.2;
+    }
+
+    .board-name span,
+    .board-metric span {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: .7rem;
+      font-weight: 850;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .board-metric {
+      text-align: right;
+    }
+
     @media (max-width: 860px) {
       .topbar,
       .layout,
@@ -584,8 +663,13 @@
 
       .choices,
       .activity-footer,
-      .progress-grid {
+      .progress-grid,
+      .board-row {
         grid-template-columns: 1fr;
+      }
+
+      .board-metric {
+        text-align: left;
       }
 
       .scene,
@@ -724,6 +808,13 @@
             <div class="mini"><span>Accuracy</span><strong id="progressAccuracy">0%</strong></div>
             <div class="mini"><span>Saved</span><strong id="progressSaved">Local</strong></div>
           </div>
+          <section class="leaderboard" aria-label="Family competition board">
+            <div class="board-head">
+              <h4>Family Competition</h4>
+              <span id="boardSummary">Overall</span>
+            </div>
+            <div class="board-list" id="leaderboard"></div>
+          </section>
           <div class="activity-footer">
             <div class="mini"><span>Parent Prompt</span><strong id="parentPrompt">Ask Evelyn to explain why the chosen word fits the sentence.</strong></div>
             <div class="mini"><span>Writing Boost</span><strong id="writingBoost">Write a new sentence with the same vocabulary word.</strong></div>
@@ -1147,6 +1238,8 @@
       progressCorrect: document.querySelector("#progressCorrect"),
       progressAccuracy: document.querySelector("#progressAccuracy"),
       progressSaved: document.querySelector("#progressSaved"),
+      boardSummary: document.querySelector("#boardSummary"),
+      leaderboard: document.querySelector("#leaderboard"),
       parentPrompt: document.querySelector("#parentPrompt"),
       writingBoost: document.querySelector("#writingBoost"),
       lastAnswer: document.querySelector("#lastAnswer")
@@ -1220,6 +1313,51 @@
       const all = JSON.parse(localStorage.getItem(storageKeys.progress) || "{}");
       all[progressKey()] = row;
       localStorage.setItem(storageKeys.progress, JSON.stringify(all));
+    }
+
+    function loadAllLocalProgress() {
+      try {
+        return JSON.parse(localStorage.getItem(storageKeys.progress)) || {};
+      } catch {
+        return {};
+      }
+    }
+
+    function familyBoardRows() {
+      const totals = Object.fromEntries(Object.entries(profiles).map(([key, profile]) => [
+        key,
+        { key, name: profile.short, stars: 0, attempts: 0, correct: 0 }
+      ]));
+
+      Object.values(loadAllLocalProgress()).forEach((row) => {
+        if (!row || !totals[row.learner]) return;
+        totals[row.learner].stars += Number(row.stars || 0);
+        totals[row.learner].attempts += Number(row.total_attempts ?? row.attempts ?? 0);
+        totals[row.learner].correct += Number(row.correct || 0);
+      });
+
+      return Object.values(totals)
+        .map((row) => ({
+          ...row,
+          accuracy: row.attempts ? Math.round((row.correct / row.attempts) * 100) : 0
+        }))
+        .sort((a, b) => b.stars - a.stars || b.accuracy - a.accuracy || b.correct - a.correct || a.name.localeCompare(b.name));
+    }
+
+    function renderLeaderboard() {
+      const rows = familyBoardRows();
+      const totalAttempts = rows.reduce((sum, row) => sum + row.attempts, 0);
+      const totalStars = rows.reduce((sum, row) => sum + row.stars, 0);
+      el.boardSummary.textContent = `${totalStars} stars · ${totalAttempts} attempts`;
+      el.leaderboard.innerHTML = rows.map((row, index) => `
+        <div class="board-row">
+          <span class="rank">${index + 1}</span>
+          <div class="board-name"><strong>${row.name}</strong><span>${row.attempts ? "Active" : "No attempts"}</span></div>
+          <div class="board-metric"><strong>${row.stars}</strong><span>Stars</span></div>
+          <div class="board-metric"><strong>${row.accuracy}%</strong><span>Accuracy</span></div>
+          <div class="board-metric"><strong>${row.correct}/${row.attempts}</strong><span>Correct</span></div>
+        </div>
+      `).join("");
     }
 
     function applyProgress(row) {
@@ -1408,6 +1546,7 @@
       el.lastAnswer.textContent = state.lastAnswer && state.lastAnswer.word
         ? `${state.lastAnswer.word}: ${state.lastAnswer.answer || "(blank)"} · ${state.lastAnswer.correct ? "correct" : "try again"}`
         : "No answers yet.";
+      renderLeaderboard();
 
       [...el.profiles.children].forEach((button) => {
         button.setAttribute("aria-pressed", button.dataset.profile === state.profile);
