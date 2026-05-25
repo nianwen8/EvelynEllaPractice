@@ -1780,7 +1780,10 @@
       saveProgress();
     }
 
-    function nextQuestion() {
+    async function nextQuestion() {
+      if (!state.checked) {
+        await checkAnswer();
+      }
       state.index = (state.index + 1) % currentWords().length;
       renderQuestion();
       saveProgress();
