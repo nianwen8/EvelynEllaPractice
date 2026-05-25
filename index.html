@@ -225,60 +225,6 @@
       border-radius: 8px;
     }
 
-    .sync-box {
-      margin-top: 16px;
-      padding: 12px;
-      background: #eefaf7;
-      border: 1px solid #b9e7dc;
-      border-radius: 8px;
-    }
-
-    .field {
-      display: grid;
-      gap: 5px;
-      margin-top: 9px;
-    }
-
-    .field label {
-      color: var(--muted);
-      font-size: .76rem;
-      font-weight: 850;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-    }
-
-    .field input {
-      width: 100%;
-      min-height: 40px;
-      padding: 8px 10px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fff;
-      outline: none;
-    }
-
-    .field input:focus {
-      border-color: var(--teal);
-      box-shadow: 0 0 0 3px rgba(15, 118, 110, .12);
-    }
-
-    .save-sync {
-      width: 100%;
-      min-height: 40px;
-      margin-top: 10px;
-      border-radius: 8px;
-      color: #fff;
-      background: var(--teal);
-      font-weight: 850;
-    }
-
-    .sync-status {
-      margin: 9px 0 0;
-      color: var(--muted);
-      font-size: .8rem;
-      line-height: 1.35;
-    }
-
     .bank-list {
       display: flex;
       flex-wrap: wrap;
@@ -713,23 +659,6 @@
           <div class="bank-list" id="wordBank"></div>
         </div>
 
-        <div class="sync-box">
-          <p class="group-title">Supabase Sync</p>
-          <div class="field">
-            <label for="familyId">Family ID</label>
-            <input id="familyId" type="text" autocomplete="off" placeholder="gu-family">
-          </div>
-          <div class="field">
-            <label for="supabaseUrl">Project URL</label>
-            <input id="supabaseUrl" type="url" autocomplete="off" placeholder="https://zfvdwqhoitknxnxdwste.supabase.co">
-          </div>
-          <div class="field">
-            <label for="supabaseAnonKey">Anon Public Key</label>
-            <input id="supabaseAnonKey" type="password" autocomplete="off" placeholder="safe browser anon key">
-          </div>
-          <button class="save-sync" id="saveSyncBtn" type="button">Save Sync Settings</button>
-          <p class="sync-status" id="syncStatus">Progress is saved in this browser until Supabase is connected.</p>
-        </div>
       </aside>
 
       <article class="practice">
@@ -1214,11 +1143,6 @@
       nextBtn: document.querySelector("#nextBtn"),
       resetBtn: document.querySelector("#resetBtn"),
       feedback: document.querySelector("#feedback"),
-      familyId: document.querySelector("#familyId"),
-      supabaseUrl: document.querySelector("#supabaseUrl"),
-      supabaseAnonKey: document.querySelector("#supabaseAnonKey"),
-      saveSyncBtn: document.querySelector("#saveSyncBtn"),
-      syncStatus: document.querySelector("#syncStatus"),
       progressAttempts: document.querySelector("#progressAttempts"),
       progressCorrect: document.querySelector("#progressCorrect"),
       progressAccuracy: document.querySelector("#progressAccuracy"),
@@ -1350,7 +1274,7 @@
     }
 
     function updateSyncStatus(text) {
-      el.syncStatus.textContent = text;
+      if (el.syncStatus) el.syncStatus.textContent = text;
     }
 
     function supabaseHeaders(extra = {}) {
@@ -1477,9 +1401,6 @@
       el.parentPrompt.textContent = profile.parentPrompt;
       el.writingBoost.textContent = profile.writingBoost;
       el.wordBank.innerHTML = words.map((item) => `<span class="chip">${item.word}</span>`).join("");
-      el.familyId.value = state.config.familyId || "";
-      el.supabaseUrl.value = state.config.supabaseUrl || "";
-      el.supabaseAnonKey.value = state.config.supabaseAnonKey || "";
       el.progressAttempts.textContent = state.attempts;
       el.progressCorrect.textContent = state.correct;
       el.progressAccuracy.textContent = state.attempts ? `${Math.round((state.correct / state.attempts) * 100)}%` : "0%";
@@ -1710,18 +1631,6 @@
       saveSession();
       await loadProgress();
       renderQuestion();
-    });
-
-    el.saveSyncBtn.addEventListener("click", async () => {
-      state.config = {
-        familyId: el.familyId.value.trim() || "gu-family",
-        supabaseUrl: el.supabaseUrl.value.trim(),
-        supabaseAnonKey: el.supabaseAnonKey.value.trim()
-      };
-      localStorage.setItem(storageKeys.config, JSON.stringify(state.config));
-      await loadProgress();
-      updateChrome();
-      await saveProgress();
     });
 
     el.questionPanel.addEventListener("click", (event) => {
