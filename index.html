@@ -893,6 +893,12 @@
               </svg>
               Next
             </button>
+            <button class="action secondary" id="clearBtn" type="button" title="Clear current question">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+              Clear
+            </button>
             <button class="action warning" id="resetBtn" type="button" title="Start over">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M4 4v6h6M20 20v-6h-6M6.3 17.7A8 8 0 0 0 20 12M17.7 6.3A8 8 0 0 0 4 12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -1336,6 +1342,7 @@
       checkBtn: document.querySelector("#checkBtn"),
       prevBtn: document.querySelector("#prevBtn"),
       nextBtn: document.querySelector("#nextBtn"),
+      clearBtn: document.querySelector("#clearBtn"),
       resetBtn: document.querySelector("#resetBtn"),
       feedback: document.querySelector("#feedback"),
       progressAttempts: document.querySelector("#progressAttempts"),
@@ -2013,6 +2020,22 @@
       saveProgress();
     }
 
+    function clearCurrentQuestion() {
+      const previousAnswer = previousAnswerForCurrentQuestion();
+      state.selected = "";
+      state.built = "";
+      state.checked = false;
+      state.awarded = Boolean(previousAnswer?.correct);
+      state.attemptCounted = false;
+      el.feedback.className = "feedback";
+      el.feedback.textContent = "Current question cleared. Pick an answer when ready.";
+      if (state.mode === "choice") renderChoice();
+      if (state.mode === "meaning") renderMeaning();
+      if (state.mode === "completion") renderCompletion();
+      if (state.mode === "sentence") renderSentence();
+      updateChrome();
+    }
+
     function resetPractice() {
       state.index = 0;
       state.stars = 0;
@@ -2086,6 +2109,7 @@
     el.checkBtn.addEventListener("click", checkAnswer);
     el.prevBtn.addEventListener("click", previousQuestion);
     el.nextBtn.addEventListener("click", nextQuestion);
+    el.clearBtn.addEventListener("click", clearCurrentQuestion);
     el.resetBtn.addEventListener("click", resetPractice);
   </script>
 </body>
