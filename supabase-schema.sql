@@ -11,6 +11,10 @@ create table if not exists public.practice_progress (
   correct integer not null default 0,
   accuracy_percent integer not null default 0,
   current_index integer not null default 0,
+  completed_set boolean not null default false,
+  completed_at timestamptz,
+  badge_count integer not null default 0,
+  badges jsonb not null default '[]'::jsonb,
   completed jsonb not null default '{}'::jsonb,
   previous_answer jsonb not null default '{}'::jsonb,
   recent_answers jsonb not null default '[]'::jsonb,
@@ -35,6 +39,18 @@ add column if not exists previous_answer jsonb not null default '{}'::jsonb;
 
 alter table public.practice_progress
 add column if not exists family_board jsonb not null default '[]'::jsonb;
+
+alter table public.practice_progress
+add column if not exists completed_set boolean not null default false;
+
+alter table public.practice_progress
+add column if not exists completed_at timestamptz;
+
+alter table public.practice_progress
+add column if not exists badge_count integer not null default 0;
+
+alter table public.practice_progress
+add column if not exists badges jsonb not null default '[]'::jsonb;
 
 alter table public.practice_progress enable row level security;
 

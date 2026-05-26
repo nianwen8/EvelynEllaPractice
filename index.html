@@ -578,7 +578,7 @@
 
     .board-row {
       display: grid;
-      grid-template-columns: 34px minmax(86px, 1fr) repeat(3, minmax(58px, auto));
+      grid-template-columns: 34px minmax(86px, 1fr) repeat(4, minmax(58px, auto));
       gap: 10px;
       align-items: center;
       min-height: 52px;
@@ -620,6 +620,105 @@
 
     .board-metric {
       text-align: right;
+    }
+
+    .celebration {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      place-items: center;
+      padding: 24px;
+      background: rgba(15, 23, 42, .34);
+    }
+
+    .celebration.show {
+      display: grid;
+      animation: celebrationFade 2.8s ease both;
+    }
+
+    .celebration-card {
+      position: relative;
+      width: min(100%, 420px);
+      padding: 24px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, .68);
+      border-radius: 8px;
+      background: #ffffff;
+      text-align: center;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, .22);
+    }
+
+    .badge-medal {
+      width: 96px;
+      height: 96px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 14px;
+      border: 8px solid #fde68a;
+      border-radius: 999px;
+      color: #713f12;
+      background: #facc15;
+      font-size: 1.1rem;
+      font-weight: 950;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      box-shadow: inset 0 0 0 4px rgba(255, 255, 255, .42);
+      animation: badgePop .7s cubic-bezier(.2, 1.4, .3, 1) both;
+    }
+
+    .celebration-card h4 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 1.45rem;
+      letter-spacing: 0;
+    }
+
+    .celebration-card p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-weight: 750;
+      line-height: 1.45;
+    }
+
+    .confetti {
+      position: absolute;
+      top: -18px;
+      width: 10px;
+      height: 18px;
+      border-radius: 2px;
+      animation: confettiFall 1.8s ease-in forwards;
+    }
+
+    @keyframes celebrationFade {
+      0%,
+      100% {
+        opacity: 0;
+        pointer-events: none;
+      }
+      12%,
+      88% {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    }
+
+    @keyframes badgePop {
+      from {
+        opacity: 0;
+        transform: scale(.62) rotate(-8deg);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) rotate(0);
+      }
+    }
+
+    @keyframes confettiFall {
+      to {
+        transform: translateY(260px) rotate(260deg);
+        opacity: 0;
+      }
     }
 
     @media (max-width: 860px) {
@@ -824,6 +923,7 @@
       </article>
     </section>
   </main>
+  <div class="celebration" id="celebration" aria-live="polite" aria-hidden="true"></div>
 
   <script>
     const defaultSupabaseConfig = {
@@ -1205,6 +1305,9 @@
       correct: 0,
       recentAnswers: [],
       lastAnswer: null,
+      badges: [],
+      completedSet: false,
+      completedAt: null,
       boardRows: [],
       selected: "",
       built: "",
@@ -1241,6 +1344,7 @@
       progressSaved: document.querySelector("#progressSaved"),
       boardSummary: document.querySelector("#boardSummary"),
       leaderboard: document.querySelector("#leaderboard"),
+      celebration: document.querySelector("#celebration"),
       parentPrompt: document.querySelector("#parentPrompt"),
       writingBoost: document.querySelector("#writingBoost"),
       lastAnswer: document.querySelector("#lastAnswer")
@@ -1301,6 +1405,52 @@
       return `${state.config.familyId || "gu-family"}:${state.profile}:${currentWeekKey()}:${state.mode}`;
     }
 
+    function badgeIdFor(row = null) {
+      const learner = row?.learner || state.profile;
+      const weekKey = row?.week_key || currentWeekKey();
+      const mode = row?.mode || state.mode;
+      return `${learner}:${weekKey}:${mode}`;
+    }
+
+    function expectedWordCount(row = null) {
+      const learner = row?.learner || state.profile;
+      const profileWeeks = weeklySets[learner] || [];
+      const week = row
+        ? profileWeeks.find((item) => item.label === row.week_label) || profileWeeks.find((item) => `${learner}-${item.label.toLowerCase().replaceAll(" ", "-")}` === row.week_key)
+        : currentWeek();
+      return week?.words?.length || currentWords().length;
+    }
+
+    function setCompleteFromAnswers(answers, row = null) {
+      if (!Array.isArray(answers)) return false;
+      const weekKey = row?.week_key || currentWeekKey();
+      const mode = row?.mode || state.mode;
+      const correctWords = new Set(answers
+        .filter((answer) => answer && answer.correct && answer.week_key === weekKey && answer.mode === mode)
+        .map((answer) => answer.word || `${answer.round}`));
+      return correctWords.size >= expectedWordCount(row);
+    }
+
+    function normalizedBadges(row = null) {
+      const existing = Array.isArray(row?.badges) ? row.badges.filter(Boolean) : [];
+      if (existing.length) return existing;
+      const hasBadge = Number(row?.badge_count || 0) > 0 || Boolean(row?.completed_set) || setCompleteFromAnswers(row?.recent_answers, row);
+      if (!hasBadge) return [];
+      return [{
+        badge_id: badgeIdFor(row),
+        learner: row?.learner || state.profile,
+        week_key: row?.week_key || currentWeekKey(),
+        week_label: row?.week_label || currentWeek().label,
+        mode: row?.mode || state.mode,
+        title: `${row?.week_label || currentWeek().label} ${modes[row?.mode || state.mode].label} Badge`,
+        awarded_at: row?.completed_at || row?.updated_at || new Date().toISOString()
+      }];
+    }
+
+    function badgeCountForRow(row) {
+      return normalizedBadges(row).length;
+    }
+
     function loadLocalProgress() {
       try {
         const all = JSON.parse(localStorage.getItem(storageKeys.progress)) || {};
@@ -1327,12 +1477,13 @@
     function familyBoardRows(progressOverride = null) {
       const totals = Object.fromEntries(Object.entries(profiles).map(([key, profile]) => [
         key,
-        { key, name: profile.short, stars: 0, attempts: 0, correct: 0 }
+        { key, name: profile.short, badges: 0, stars: 0, attempts: 0, correct: 0 }
       ]));
 
       const progressRows = progressOverride ? Object.values(progressOverride) : Object.values(loadAllLocalProgress());
       progressRows.forEach((row) => {
         if (!row || !totals[row.learner]) return;
+        totals[row.learner].badges += badgeCountForRow(row);
         totals[row.learner].stars += Number(row.stars || 0);
         totals[row.learner].attempts += Number(row.total_attempts ?? row.attempts ?? 0);
         totals[row.learner].correct += Number(row.correct || 0);
@@ -1343,7 +1494,7 @@
           ...row,
           accuracy: row.attempts ? Math.round((row.correct / row.attempts) * 100) : 0
         }))
-        .sort((a, b) => b.stars - a.stars || b.accuracy - a.accuracy || b.correct - a.correct || a.name.localeCompare(b.name));
+        .sort((a, b) => b.badges - a.badges || b.stars - a.stars || b.accuracy - a.accuracy || b.correct - a.correct || a.name.localeCompare(b.name));
     }
 
     function applyBoardRowsFromProgress(rows) {
@@ -1361,11 +1512,13 @@
       const rows = state.boardRows.length ? state.boardRows : familyBoardRows();
       const totalAttempts = rows.reduce((sum, row) => sum + row.attempts, 0);
       const totalStars = rows.reduce((sum, row) => sum + row.stars, 0);
-      el.boardSummary.textContent = `${totalStars} stars · ${totalAttempts} attempts`;
+      const totalBadges = rows.reduce((sum, row) => sum + row.badges, 0);
+      el.boardSummary.textContent = `${totalBadges} badges · ${totalStars} stars · ${totalAttempts} attempts`;
       el.leaderboard.innerHTML = rows.map((row, index) => `
         <div class="board-row">
           <span class="rank">${index + 1}</span>
           <div class="board-name"><strong>${row.name}</strong><span>${row.attempts ? "Active" : "No attempts"}</span></div>
+          <div class="board-metric"><strong>${row.badges}</strong><span>Badges</span></div>
           <div class="board-metric"><strong>${row.stars}</strong><span>Stars</span></div>
           <div class="board-metric"><strong>${row.accuracy}%</strong><span>Accuracy</span></div>
           <div class="board-metric"><strong>${row.correct}/${row.attempts}</strong><span>Correct</span></div>
@@ -1380,6 +1533,9 @@
         state.correct = 0;
         state.recentAnswers = [];
         state.lastAnswer = null;
+        state.badges = [];
+        state.completedSet = false;
+        state.completedAt = null;
         state.index = 0;
         state.savedTo = hasSupabaseConfig() ? "Supabase ready" : "Local";
         return;
@@ -1390,6 +1546,9 @@
       state.index = Number(row.current_index || 0) % currentWords().length;
       state.recentAnswers = Array.isArray(row.recent_answers) ? row.recent_answers : [];
       state.lastAnswer = row.previous_answer || state.recentAnswers[0] || row.completed || null;
+      state.badges = normalizedBadges(row);
+      state.completedSet = Boolean(row.completed_set) || state.badges.length > 0 || setCompleteFromAnswers(state.recentAnswers);
+      state.completedAt = row.completed_at || state.badges[0]?.awarded_at || null;
       state.savedTo = row.saved_to || "Local";
     }
 
@@ -1399,6 +1558,8 @@
         : state.recentAnswers;
       const previousAnswer = answerRecord || state.lastAnswer || recentAnswers[0] || {};
       const accuracyPercent = state.attempts ? Math.round((state.correct / state.attempts) * 100) : 0;
+      const completedSet = state.completedSet || setCompleteFromAnswers(recentAnswers);
+      const completedAt = completedSet ? (state.completedAt || state.badges[0]?.awarded_at || new Date().toISOString()) : null;
       const row = {
         family_id: state.config.familyId || "gu-family",
         learner: state.profile,
@@ -1412,6 +1573,10 @@
         correct: state.correct,
         accuracy_percent: accuracyPercent,
         current_index: state.index,
+        completed_set: completedSet,
+        completed_at: completedAt,
+        badge_count: state.badges.length,
+        badges: state.badges,
         completed: previousAnswer,
         previous_answer: previousAnswer,
         recent_answers: recentAnswers,
@@ -1505,6 +1670,9 @@
       saveLocalProgress(row);
       state.recentAnswers = row.recent_answers;
       state.lastAnswer = row.completed;
+      state.badges = row.badges;
+      state.completedSet = row.completed_set;
+      state.completedAt = row.completed_at;
       state.boardRows = familyBoardRows();
       state.savedTo = "Local";
       updateChrome();
@@ -1532,6 +1700,9 @@
         if (rows[0]) {
           state.recentAnswers = Array.isArray(rows[0].recent_answers) ? rows[0].recent_answers : row.recent_answers;
           state.lastAnswer = rows[0].previous_answer || state.recentAnswers[0] || rows[0].completed || row.completed;
+          state.badges = normalizedBadges(rows[0]);
+          state.completedSet = Boolean(rows[0].completed_set) || state.badges.length > 0 || setCompleteFromAnswers(state.recentAnswers);
+          state.completedAt = rows[0].completed_at || state.badges[0]?.awarded_at || row.completed_at;
           saveLocalProgress({ ...rows[0], saved_to: "Supabase" });
           state.boardRows = Array.isArray(rows[0].family_board) ? rows[0].family_board : familyBoardRows();
         }
@@ -1743,6 +1914,56 @@
       };
     }
 
+    function createBadgeRecord() {
+      const awardedAt = new Date().toISOString();
+      return {
+        badge_id: badgeIdFor(),
+        learner: state.profile,
+        week_key: currentWeekKey(),
+        week_label: currentWeek().label,
+        week_theme: currentWeek().theme,
+        mode: state.mode,
+        title: `${currentWeek().label} ${modes[state.mode].label} Badge`,
+        awarded_at: awardedAt
+      };
+    }
+
+    function awardSetBadgeIfEarned() {
+      if (!setCompleteFromAnswers(state.recentAnswers)) return null;
+      state.completedSet = true;
+      if (state.badges.some((badge) => badge.badge_id === badgeIdFor())) return null;
+      const badge = createBadgeRecord();
+      state.badges = [badge, ...state.badges];
+      state.completedAt = badge.awarded_at;
+      return badge;
+    }
+
+    function showCelebration(badge) {
+      if (!badge || !el.celebration) return;
+      const colors = ["#2563eb", "#f59e0b", "#14b8a6", "#e11d48", "#84cc16", "#7c3aed"];
+      const confetti = Array.from({ length: 28 }, (_, index) => {
+        const left = 6 + ((index * 13) % 88);
+        const delay = (index % 8) * .08;
+        const color = colors[index % colors.length];
+        return `<span class="confetti" style="left:${left}%;background:${color};animation-delay:${delay}s"></span>`;
+      }).join("");
+      el.celebration.innerHTML = `
+        <div class="celebration-card">
+          ${confetti}
+          <div class="badge-medal">Badge</div>
+          <h4>Set complete!</h4>
+          <p>${currentProfile().short} earned the ${badge.title}. Badge ranking updated.</p>
+        </div>
+      `;
+      el.celebration.classList.remove("show");
+      el.celebration.setAttribute("aria-hidden", "false");
+      window.requestAnimationFrame(() => el.celebration.classList.add("show"));
+      window.setTimeout(() => {
+        el.celebration.classList.remove("show");
+        el.celebration.setAttribute("aria-hidden", "true");
+      }, 3000);
+    }
+
     async function checkAnswer() {
       const item = currentWord();
       let ok = false;
@@ -1767,11 +1988,14 @@
         state.awarded = true;
       }
       state.lastAnswer = answerRecord;
+      state.recentAnswers = [answerRecord, ...state.recentAnswers.filter((answer) => answer.answer_id !== answerRecord.answer_id)];
+      const earnedBadge = awardSetBadgeIfEarned();
       setFeedback(ok, item);
       if (state.mode === "choice") renderChoice();
       if (state.mode === "meaning") renderMeaning();
       updateChrome();
       await saveProgress(answerRecord);
+      showCelebration(earnedBadge);
     }
 
     function previousQuestion() {
@@ -1794,6 +2018,11 @@
       state.stars = 0;
       state.attempts = 0;
       state.correct = 0;
+      state.recentAnswers = [];
+      state.lastAnswer = null;
+      state.badges = [];
+      state.completedSet = false;
+      state.completedAt = null;
       renderQuestion();
       saveProgress();
     }

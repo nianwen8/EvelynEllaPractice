@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "python3 -m http.server 4173",
+    "apply:supabase": "node scripts/apply-supabase-schema.cjs",
     "deploy": "node scripts/deploy-vercel.mjs"
   }
 }
