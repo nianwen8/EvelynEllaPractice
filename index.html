@@ -1319,6 +1319,10 @@
       }
     };
 
+    const modeAliases = {
+      meaning: ["meaning", "meaning-match", "meaningMatch", "match"]
+    };
+
     const icons = {
       choice: '<svg class="mode-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="m15 17 2 2 4-5" stroke="#4d7c0f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
       complete: '<svg class="mode-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="2"/><rect x="10" y="5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="2"/><rect x="17" y="5" width="4" height="5" rx="1" stroke="currentColor" stroke-width="2"/><path d="M4 17h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
@@ -1343,7 +1347,7 @@
 
     const state = {
       profile: savedSession.profile || "evelyn",
-      mode: savedSession.mode || "choice",
+      mode: canonicalMode(savedSession.mode || "choice"),
       week: Number.isInteger(savedSession.week) ? savedSession.week : defaultWeekIndex(),
       index: 0,
       stars: 0,
@@ -1423,7 +1427,7 @@
     function saveSession() {
       localStorage.setItem(storageKeys.session, JSON.stringify({
         profile: state.profile,
-        mode: state.mode,
+        mode: canonicalMode(state.mode),
         week: state.week
       }));
     }
@@ -1452,14 +1456,23 @@
       return `${state.profile}-${currentWeek().label.toLowerCase().replaceAll(" ", "-")}`;
     }
 
+    function canonicalMode(mode) {
+      return Object.entries(modeAliases).find(([, aliases]) => aliases.includes(mode))?.[0] || mode;
+    }
+
+    function modeFilterValue(mode) {
+      const aliases = modeAliases[mode] || [mode];
+      return aliases.length > 1 ? `in.(${aliases.join(",")})` : `eq.${mode}`;
+    }
+
     function progressKey() {
-      return `${state.config.familyId || "gu-family"}:${state.profile}:${currentWeekKey()}:${state.mode}`;
+      return `${state.config.familyId || "gu-family"}:${state.profile}:${currentWeekKey()}:${canonicalMode(state.mode)}`;
     }
 
     function badgeIdFor(row = null) {
       const learner = row?.learner || state.profile;
       const weekKey = row?.week_key || currentWeekKey();
-      const mode = row?.mode || state.mode;
+      const mode = canonicalMode(row?.mode || state.mode);
       return `${learner}:${weekKey}:${mode}`;
     }
 
@@ -1475,9 +1488,9 @@
     function setCompleteFromAnswers(answers, row = null) {
       if (!Array.isArray(answers)) return false;
       const weekKey = row?.week_key || currentWeekKey();
-      const mode = row?.mode || state.mode;
+      const mode = canonicalMode(row?.mode || state.mode);
       const correctWords = new Set(answers
-        .filter((answer) => answer && answer.correct && answer.week_key === weekKey && answer.mode === mode)
+        .filter((answer) => answer && answer.correct && answer.week_key === weekKey && canonicalMode(answer.mode) === mode)
         .map((answer) => answer.word || `${answer.round}`));
       return correctWords.size >= expectedWordCount(row);
     }
@@ -1493,8 +1506,8 @@
         learner: row?.learner || state.profile,
         week_key: row?.week_key || currentWeekKey(),
         week_label: row?.week_label || currentWeek().label,
-        mode: row?.mode || state.mode,
-        title: `${row?.week_label || currentWeek().label} ${modes[row?.mode || state.mode].label} Badge`,
+        mode: canonicalMode(row?.mode || state.mode),
+        title: `${row?.week_label || currentWeek().label} ${modes[canonicalMode(row?.mode || state.mode)].label} Badge`,
         awarded_at: row?.completed_at || row?.updated_at || new Date().toISOString()
       }];
     }
@@ -1553,8 +1566,9 @@
       const all = loadAllLocalProgress();
       rows.forEach((row) => {
         if (!row || !row.learner || !row.week_key || !row.mode) return;
-        const key = `${row.family_id || state.config.familyId || "gu-family"}:${row.learner}:${row.week_key}:${row.mode}`;
-        all[key] = { ...row, saved_to: "Supabase" };
+        const normalizedMode = canonicalMode(row.mode);
+        const key = `${row.family_id || state.config.familyId || "gu-family"}:${row.learner}:${row.week_key}:${normalizedMode}`;
+        all[key] = { ...row, mode: normalizedMode, saved_to: "Supabase" };
       });
       localStorage.setItem(storageKeys.progress, JSON.stringify(all));
       state.boardRows = familyBoardRows();
@@ -1618,7 +1632,7 @@
         week_key: currentWeekKey(),
         week_label: currentWeek().label,
         week_theme: currentWeek().theme,
-        mode: state.mode,
+        mode: canonicalMode(state.mode),
         stars: state.stars,
         attempts: state.attempts,
         total_attempts: state.attempts,
@@ -1689,7 +1703,7 @@
           family_id: `eq.${state.config.familyId || "gu-family"}`,
           learner: `eq.${state.profile}`,
           week_key: `eq.${currentWeekKey()}`,
-          mode: `eq.${state.mode}`,
+          mode: modeFilterValue(state.mode),
           select: "*",
           limit: "1"
         });
@@ -1928,7 +1942,7 @@
       const round = (state.index % currentWords().length) + 1;
       return state.recentAnswers.find((answer) => (
         answer &&
-        answer.mode === state.mode &&
+        canonicalMode(answer.mode) === canonicalMode(state.mode) &&
         answer.week_key === currentWeekKey() &&
         answer.round === round &&
         answer.word === item.word
@@ -1955,7 +1969,7 @@
         learner: state.profile,
         week_key: currentWeekKey(),
         week_label: currentWeek().label,
-        mode: state.mode,
+        mode: canonicalMode(state.mode),
         round: (state.index % currentWords().length) + 1,
         word: item.word,
         clue: item.clue,
@@ -1974,8 +1988,8 @@
         week_key: currentWeekKey(),
         week_label: currentWeek().label,
         week_theme: currentWeek().theme,
-        mode: state.mode,
-        title: `${currentWeek().label} ${modes[state.mode].label} Badge`,
+        mode: canonicalMode(state.mode),
+        title: `${currentWeek().label} ${modes[canonicalMode(state.mode)].label} Badge`,
         awarded_at: awardedAt
       };
     }
