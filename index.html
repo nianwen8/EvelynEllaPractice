@@ -634,7 +634,7 @@
 
     .celebration.show {
       display: grid;
-      animation: celebrationFade 2.8s ease both;
+      animation: celebrationFade 3.4s ease both;
     }
 
     .celebration-card {
@@ -647,6 +647,24 @@
       background: #ffffff;
       text-align: center;
       box-shadow: 0 24px 60px rgba(15, 23, 42, .22);
+      animation: cardLift .7s cubic-bezier(.2, 1.2, .3, 1) both;
+    }
+
+    .celebration-card::before,
+    .celebration-card::after {
+      content: "";
+      position: absolute;
+      inset: 12px;
+      border: 2px solid #facc15;
+      border-radius: 8px;
+      opacity: .65;
+      pointer-events: none;
+      animation: celebrationRing 1.35s ease-out infinite;
+    }
+
+    .celebration-card::after {
+      border-color: #14b8a6;
+      animation-delay: .28s;
     }
 
     .badge-medal {
@@ -711,6 +729,28 @@
       to {
         opacity: 1;
         transform: scale(1) rotate(0);
+      }
+    }
+
+    @keyframes cardLift {
+      from {
+        opacity: 0;
+        transform: translateY(18px) scale(.94);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes celebrationRing {
+      from {
+        opacity: .7;
+        transform: scale(.88);
+      }
+      to {
+        opacity: 0;
+        transform: scale(1.18);
       }
     }
 
@@ -1404,6 +1444,10 @@
       return currentWords()[state.index % currentWords().length];
     }
 
+    function isLastQuestion() {
+      return (state.index % currentWords().length) === currentWords().length - 1;
+    }
+
     function currentWeekKey() {
       return `${state.profile}-${currentWeek().label.toLowerCase().replaceAll(" ", "-")}`;
     }
@@ -1441,7 +1485,8 @@
     function normalizedBadges(row = null) {
       const existing = Array.isArray(row?.badges) ? row.badges.filter(Boolean) : [];
       if (existing.length) return existing;
-      const hasBadge = Number(row?.badge_count || 0) > 0 || Boolean(row?.completed_set) || setCompleteFromAnswers(row?.recent_answers, row);
+      const hasCompletionColumns = row && ("completed_set" in row || "badge_count" in row || "badges" in row);
+      const hasBadge = Number(row?.badge_count || 0) > 0 || Boolean(row?.completed_set) || (!hasCompletionColumns && setCompleteFromAnswers(row?.recent_answers, row));
       if (!hasBadge) return [];
       return [{
         badge_id: badgeIdFor(row),
@@ -1554,7 +1599,7 @@
       state.recentAnswers = Array.isArray(row.recent_answers) ? row.recent_answers : [];
       state.lastAnswer = row.previous_answer || state.recentAnswers[0] || row.completed || null;
       state.badges = normalizedBadges(row);
-      state.completedSet = Boolean(row.completed_set) || state.badges.length > 0 || setCompleteFromAnswers(state.recentAnswers);
+      state.completedSet = Boolean(row.completed_set) || state.badges.length > 0;
       state.completedAt = row.completed_at || state.badges[0]?.awarded_at || null;
       state.savedTo = row.saved_to || "Local";
     }
@@ -1565,7 +1610,7 @@
         : state.recentAnswers;
       const previousAnswer = answerRecord || state.lastAnswer || recentAnswers[0] || {};
       const accuracyPercent = state.attempts ? Math.round((state.correct / state.attempts) * 100) : 0;
-      const completedSet = state.completedSet || setCompleteFromAnswers(recentAnswers);
+      const completedSet = state.completedSet;
       const completedAt = completedSet ? (state.completedAt || state.badges[0]?.awarded_at || new Date().toISOString()) : null;
       const row = {
         family_id: state.config.familyId || "gu-family",
@@ -1708,7 +1753,7 @@
           state.recentAnswers = Array.isArray(rows[0].recent_answers) ? rows[0].recent_answers : row.recent_answers;
           state.lastAnswer = rows[0].previous_answer || state.recentAnswers[0] || rows[0].completed || row.completed;
           state.badges = normalizedBadges(rows[0]);
-          state.completedSet = Boolean(rows[0].completed_set) || state.badges.length > 0 || setCompleteFromAnswers(state.recentAnswers);
+          state.completedSet = Boolean(rows[0].completed_set) || state.badges.length > 0;
           state.completedAt = rows[0].completed_at || state.badges[0]?.awarded_at || row.completed_at;
           saveLocalProgress({ ...rows[0], saved_to: "Supabase" });
           state.boardRows = Array.isArray(rows[0].family_board) ? rows[0].family_board : familyBoardRows();
@@ -1936,6 +1981,7 @@
     }
 
     function awardSetBadgeIfEarned() {
+      if (!isLastQuestion()) return null;
       if (!setCompleteFromAnswers(state.recentAnswers)) return null;
       state.completedSet = true;
       if (state.badges.some((badge) => badge.badge_id === badgeIdFor())) return null;
@@ -2003,6 +2049,7 @@
       updateChrome();
       await saveProgress(answerRecord);
       showCelebration(earnedBadge);
+      return earnedBadge;
     }
 
     function previousQuestion() {
@@ -2013,7 +2060,17 @@
 
     async function nextQuestion() {
       if (!state.checked) {
-        await checkAnswer();
+        const earnedBadge = await checkAnswer();
+        if (earnedBadge) return;
+      }
+      const earnedBadge = awardSetBadgeIfEarned();
+      if (earnedBadge) {
+        await saveProgress();
+        showCelebration(earnedBadge);
+        return;
+      }
+      if (isLastQuestion() && state.completedSet) {
+        return;
       }
       state.index = (state.index + 1) % currentWords().length;
       renderQuestion();
