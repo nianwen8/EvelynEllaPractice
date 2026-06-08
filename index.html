@@ -708,6 +708,180 @@
       animation: confettiFall 1.8s ease-in forwards;
     }
 
+    .reward {
+      position: fixed;
+      inset: 0;
+      z-index: 21;
+      display: none;
+      place-items: center;
+      padding: 18px;
+      background: rgba(15, 23, 42, .42);
+    }
+
+    .reward.show {
+      display: grid;
+    }
+
+    .reward-panel {
+      width: min(100%, 760px);
+      max-height: min(92vh, 760px);
+      display: grid;
+      gap: 14px;
+      overflow: auto;
+      padding: 18px;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 24px 70px rgba(15, 23, 42, .28);
+    }
+
+    .reward-head,
+    .reward-tabs,
+    .catch-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .reward-head h4 {
+      margin: 0;
+      font-size: 1.25rem;
+      letter-spacing: 0;
+    }
+
+    .reward-tabs button,
+    .reward-close,
+    .catch-controls button {
+      min-height: 40px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: #e0f2fe;
+      color: #1e3a8a;
+      font-weight: 850;
+    }
+
+    .reward-tabs button[aria-pressed="true"] {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .reward-close {
+      background: #f1f5f9;
+      color: var(--ink);
+    }
+
+    .reward-board {
+      display: grid;
+      gap: 14px;
+      min-height: 320px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fbff;
+    }
+
+    .word-search-grid {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      gap: 4px;
+      max-width: 440px;
+    }
+
+    .search-cell,
+    .memory-card {
+      min-height: 38px;
+      border: 1px solid #dbe5f0;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .search-cell.selected {
+      background: #fef3c7;
+      border-color: #f59e0b;
+    }
+
+    .search-cell.found,
+    .memory-card.matched {
+      background: #dcfce7;
+      border-color: #22c55e;
+      color: #166534;
+    }
+
+    .reward-words {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .reward-words span {
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #3730a3;
+      font-weight: 850;
+    }
+
+    .reward-words span.done {
+      background: #dcfce7;
+      color: #166534;
+      text-decoration: line-through;
+    }
+
+    .memory-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .memory-card {
+      min-height: 74px;
+      padding: 10px;
+      overflow-wrap: anywhere;
+      font-size: .86rem;
+    }
+
+    .memory-card.hidden {
+      color: #fff;
+      background: var(--blue);
+    }
+
+    .catch-stage {
+      position: relative;
+      height: 260px;
+      overflow: hidden;
+      border: 1px solid #dbe5f0;
+      border-radius: 8px;
+      background: #ecfeff;
+    }
+
+    .falling-word,
+    .basket {
+      position: absolute;
+      left: calc(var(--lane) * 20% + 3%);
+      width: 14%;
+      min-height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      font-weight: 900;
+      transition: top .22s ease, left .18s ease;
+    }
+
+    .falling-word {
+      top: var(--drop);
+      background: #fef3c7;
+      color: #713f12;
+    }
+
+    .basket {
+      bottom: 10px;
+      background: var(--blue);
+      color: #fff;
+    }
+
     @keyframes celebrationFade {
       0%,
       100% {
@@ -803,7 +977,8 @@
       .choices,
       .activity-footer,
       .progress-grid,
-      .board-row {
+      .board-row,
+      .memory-grid {
         grid-template-columns: 1fr;
       }
 
@@ -970,6 +1145,7 @@
     </section>
   </main>
   <div class="celebration" id="celebration" aria-live="polite" aria-hidden="true"></div>
+  <div class="reward" id="reward" aria-live="polite" aria-hidden="true"></div>
 
   <script>
     const defaultSupabaseConfig = {
@@ -1368,7 +1544,22 @@
       attemptCounted: false,
       config: loadConfig(),
       syncing: false,
-      savedTo: "Local"
+      savedTo: "Local",
+      rewardGame: "word-search",
+      reward: {
+        searchSelected: [],
+        searchFound: [],
+        memoryDeck: [],
+        memoryOpen: [],
+        memoryMatched: [],
+        catchTarget: 0,
+        catchWord: null,
+        catchLane: 2,
+        catchDrop: 0,
+        basketLane: 2,
+        catchScore: 0,
+        catchTimer: null
+      }
     };
 
     const el = {
@@ -1398,6 +1589,7 @@
       boardSummary: document.querySelector("#boardSummary"),
       leaderboard: document.querySelector("#leaderboard"),
       celebration: document.querySelector("#celebration"),
+      reward: document.querySelector("#reward"),
       parentPrompt: document.querySelector("#parentPrompt"),
       writingBoost: document.querySelector("#writingBoost"),
       lastAnswer: document.querySelector("#lastAnswer")
@@ -1507,13 +1699,14 @@
       const hasCompletionColumns = row && ("completed_set" in row || "badge_count" in row || "badges" in row);
       const hasBadge = Number(row?.badge_count || 0) > 0 || Boolean(row?.completed_set) || (!hasCompletionColumns && setCompleteFromAnswers(row?.recent_answers, row));
       if (!hasBadge) return [];
+      const modeKey = modes[canonicalMode(row?.mode || state.mode)] ? canonicalMode(row?.mode || state.mode) : "choice";
       return [{
         badge_id: badgeIdFor(row),
         learner: row?.learner || state.profile,
         week_key: row?.week_key || currentWeekKey(),
         week_label: row?.week_label || currentWeek().label,
-        mode: canonicalMode(row?.mode || state.mode),
-        title: `${row?.week_label || currentWeek().label} ${modes[canonicalMode(row?.mode || state.mode)].label} Badge`,
+        mode: modeKey,
+        title: `${row?.week_label || currentWeek().label} ${modes[modeKey].label} Badge`,
         awarded_at: row?.completed_at || row?.updated_at || new Date().toISOString()
       }];
     }
@@ -2035,7 +2228,224 @@
       window.setTimeout(() => {
         el.celebration.classList.remove("show");
         el.celebration.setAttribute("aria-hidden", "true");
+        openRewardGames();
       }, 3000);
+    }
+
+    function rewardWords() {
+      return currentWords().slice(0, 8);
+    }
+
+    function resetRewardGame(game = state.rewardGame) {
+      stopCatchGame();
+      state.rewardGame = game;
+      state.reward.searchSelected = [];
+      state.reward.searchFound = [];
+      state.reward.memoryOpen = [];
+      state.reward.memoryMatched = [];
+      state.reward.memoryDeck = [];
+      state.reward.catchTarget = 0;
+      state.reward.catchWord = null;
+      state.reward.catchLane = 2;
+      state.reward.catchDrop = 0;
+      state.reward.basketLane = 2;
+      state.reward.catchScore = 0;
+    }
+
+    function openRewardGames() {
+      if (!el.reward) return;
+      resetRewardGame(state.rewardGame);
+      el.reward.classList.add("show");
+      el.reward.setAttribute("aria-hidden", "false");
+      renderRewardGames();
+    }
+
+    function closeRewardGames() {
+      stopCatchGame();
+      if (!el.reward) return;
+      el.reward.classList.remove("show");
+      el.reward.setAttribute("aria-hidden", "true");
+    }
+
+    function renderRewardGames() {
+      if (!el.reward) return;
+      el.reward.innerHTML = `
+        <div class="reward-panel">
+          <div class="reward-head">
+            <h4>Reward Games</h4>
+            <button class="reward-close" type="button" data-reward-close>Close</button>
+          </div>
+          <div class="reward-tabs" role="tablist" aria-label="Reward games">
+            <button type="button" data-reward-game="word-search" aria-pressed="${state.rewardGame === "word-search"}">Word Search</button>
+            <button type="button" data-reward-game="memory" aria-pressed="${state.rewardGame === "memory"}">Memory Game</button>
+            <button type="button" data-reward-game="catch" aria-pressed="${state.rewardGame === "catch"}">Slide & Catch</button>
+          </div>
+          <div class="reward-board" id="rewardBoard">${renderRewardBoard()}</div>
+        </div>
+      `;
+    }
+
+    function renderRewardBoard() {
+      if (state.rewardGame === "memory") return renderMemoryGame();
+      if (state.rewardGame === "catch") return renderCatchGame();
+      return renderWordSearch();
+    }
+
+    function wordSearchGrid() {
+      const size = 10;
+      const letters = Array.from({ length: size }, () => Array.from({ length: size }, () => ""));
+      rewardWords().slice(0, 5).forEach((item, index) => {
+        const word = item.word.toUpperCase().replace(/[^A-Z]/g, "").slice(0, size);
+        const row = (index * 2) % size;
+        [...word].forEach((letter, col) => {
+          letters[row][col] = letter;
+        });
+      });
+      const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      return letters.map((row, rowIndex) => row.map((letter, colIndex) => (
+        letter || alphabet[(rowIndex * 7 + colIndex * 3) % alphabet.length]
+      )));
+    }
+
+    function renderWordSearch() {
+      const grid = wordSearchGrid();
+      const words = rewardWords().slice(0, 5).map((item) => item.word.toUpperCase());
+      const selectedText = state.reward.searchSelected.map((cell) => cell.letter).join("");
+      return `
+        <div>
+          <strong>Find the words by tapping letters in order.</strong>
+          <p class="hint">Selected: ${selectedText || "none"}</p>
+        </div>
+        <div class="word-search-grid">
+          ${grid.map((row, rowIndex) => row.map((letter, colIndex) => {
+            const key = `${rowIndex}-${colIndex}`;
+            const selected = state.reward.searchSelected.some((cell) => cell.key === key);
+            const found = state.reward.searchFound.some((word) => word.includes.includes(key));
+            return `<button class="search-cell${selected ? " selected" : ""}${found ? " found" : ""}" type="button" data-search-cell="${key}" data-letter="${letter}">${letter}</button>`;
+          }).join("")).join("")}
+        </div>
+        <div class="reward-words">
+          ${words.map((word) => `<span class="${state.reward.searchFound.some((found) => found.word === word) ? "done" : ""}">${word}</span>`).join("")}
+        </div>
+      `;
+    }
+
+    function handleSearchCell(button) {
+      const cell = { key: button.dataset.searchCell, letter: button.dataset.letter };
+      state.reward.searchSelected.push(cell);
+      const selectedText = state.reward.searchSelected.map((item) => item.letter).join("");
+      const foundWord = rewardWords().slice(0, 5).map((item) => item.word.toUpperCase()).find((word) => word === selectedText);
+      if (foundWord) {
+        state.reward.searchFound.push({ word: foundWord, includes: state.reward.searchSelected.map((item) => item.key) });
+        state.reward.searchSelected = [];
+      }
+      const longest = Math.max(...rewardWords().slice(0, 5).map((item) => item.word.length));
+      if (state.reward.searchSelected.length > longest) state.reward.searchSelected = [];
+      renderRewardGames();
+    }
+
+    function memoryDeck() {
+      if (state.reward.memoryDeck.length) return state.reward.memoryDeck;
+      const cards = rewardWords().slice(0, 4).flatMap((item) => [
+        { id: `${item.word}-word`, pair: item.word, text: item.word },
+        { id: `${item.word}-clue`, pair: item.word, text: item.clue }
+      ]);
+      state.reward.memoryDeck = shuffle(cards);
+      return state.reward.memoryDeck;
+    }
+
+    function renderMemoryGame() {
+      const deck = memoryDeck();
+      return `
+        <div>
+          <strong>Match each word with its meaning.</strong>
+          <p class="hint">${state.reward.memoryMatched.length / 2} / 4 pairs matched</p>
+        </div>
+        <div class="memory-grid">
+          ${deck.map((card, index) => {
+            const open = state.reward.memoryOpen.includes(index) || state.reward.memoryMatched.includes(index);
+            const matched = state.reward.memoryMatched.includes(index);
+            return `<button class="memory-card${open ? "" : " hidden"}${matched ? " matched" : ""}" type="button" data-memory-card="${index}">${open ? card.text : "?"}</button>`;
+          }).join("")}
+        </div>
+      `;
+    }
+
+    function handleMemoryCard(index) {
+      if (state.reward.memoryMatched.includes(index) || state.reward.memoryOpen.includes(index)) return;
+      state.reward.memoryOpen.push(index);
+      if (state.reward.memoryOpen.length === 2) {
+        const deck = memoryDeck();
+        const [first, second] = state.reward.memoryOpen;
+        if (deck[first].pair === deck[second].pair) {
+          state.reward.memoryMatched.push(first, second);
+          state.reward.memoryOpen = [];
+        } else {
+          window.setTimeout(() => {
+            state.reward.memoryOpen = [];
+            renderRewardGames();
+          }, 700);
+        }
+      }
+      renderRewardGames();
+    }
+
+    function nextCatchDrop() {
+      const words = rewardWords();
+      const target = words[state.reward.catchTarget % words.length];
+      const pool = shuffle(words).slice(0, 4);
+      if (!pool.some((item) => item.word === target.word)) pool[0] = target;
+      state.reward.catchWord = pool[Math.floor(Math.random() * pool.length)];
+      state.reward.catchLane = Math.floor(Math.random() * 5);
+      state.reward.catchDrop = 0;
+    }
+
+    function renderCatchGame() {
+      if (!state.reward.catchWord) nextCatchDrop();
+      const target = rewardWords()[state.reward.catchTarget % rewardWords().length];
+      return `
+        <div>
+          <strong>Catch the word that matches the clue.</strong>
+          <p class="hint">Clue: ${target.clue}</p>
+        </div>
+        <div class="catch-stage">
+          <div class="falling-word" style="--lane:${state.reward.catchLane};--drop:${state.reward.catchDrop}%">${state.reward.catchWord.word}</div>
+          <div class="basket" style="--lane:${state.reward.basketLane}">Catch</div>
+        </div>
+        <div class="catch-controls">
+          <button type="button" data-catch-move="-1">Left</button>
+          <strong>Score ${state.reward.catchScore}</strong>
+          <button type="button" data-catch-move="1">Right</button>
+          <button type="button" data-catch-start>${state.reward.catchTimer ? "Running" : "Start"}</button>
+        </div>
+      `;
+    }
+
+    function startCatchGame() {
+      if (state.reward.catchTimer) return;
+      state.reward.catchTimer = window.setInterval(() => {
+        state.reward.catchDrop += 14;
+        if (state.reward.catchDrop >= 82) {
+          const target = rewardWords()[state.reward.catchTarget % rewardWords().length];
+          if (state.reward.catchLane === state.reward.basketLane && state.reward.catchWord.word === target.word) {
+            state.reward.catchScore += 1;
+            state.reward.catchTarget += 1;
+          }
+          nextCatchDrop();
+        }
+        renderRewardGames();
+      }, 520);
+    }
+
+    function stopCatchGame() {
+      if (!state.reward.catchTimer) return;
+      window.clearInterval(state.reward.catchTimer);
+      state.reward.catchTimer = null;
+    }
+
+    function moveCatchBasket(direction) {
+      state.reward.basketLane = Math.max(0, Math.min(4, state.reward.basketLane + direction));
+      renderRewardGames();
     }
 
     async function checkAnswer() {
@@ -2189,6 +2599,44 @@
     el.nextBtn.addEventListener("click", nextQuestion);
     el.clearBtn.addEventListener("click", clearCurrentQuestion);
     el.resetBtn.addEventListener("click", resetPractice);
+    el.reward.addEventListener("click", (event) => {
+      const close = event.target.closest("[data-reward-close]");
+      if (close) {
+        closeRewardGames();
+        return;
+      }
+
+      const game = event.target.closest("[data-reward-game]");
+      if (game) {
+        resetRewardGame(game.dataset.rewardGame);
+        renderRewardGames();
+        return;
+      }
+
+      const searchCell = event.target.closest("[data-search-cell]");
+      if (searchCell) {
+        handleSearchCell(searchCell);
+        return;
+      }
+
+      const memoryCard = event.target.closest("[data-memory-card]");
+      if (memoryCard) {
+        handleMemoryCard(Number(memoryCard.dataset.memoryCard));
+        return;
+      }
+
+      const catchStart = event.target.closest("[data-catch-start]");
+      if (catchStart) {
+        startCatchGame();
+        renderRewardGames();
+        return;
+      }
+
+      const catchMove = event.target.closest("[data-catch-move]");
+      if (catchMove) {
+        moveCatchBasket(Number(catchMove.dataset.catchMove));
+      }
+    });
   </script>
 </body>
 </html>
