@@ -18,6 +18,8 @@
       --lime: #4d7c0f;
       --line: #d7dde6;
       --shadow: 0 18px 40px rgba(23, 32, 42, .12);
+      --decor-accent: #2563eb;
+      --decor-soft: #e0f2fe;
     }
 
     * {
@@ -30,7 +32,8 @@
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--ink);
       background:
-        linear-gradient(135deg, rgba(37, 99, 235, .06) 0 22%, transparent 22% 100%),
+        radial-gradient(circle at 12% 8%, rgba(250, 204, 21, .18), transparent 28%),
+        radial-gradient(circle at 85% 12%, rgba(20, 184, 166, .16), transparent 26%),
         linear-gradient(180deg, #fffaf2 0%, #f6fbff 100%);
     }
 
@@ -100,6 +103,7 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       background: rgba(255, 255, 255, .82);
+      box-shadow: 0 8px 16px rgba(23, 32, 42, .08);
     }
 
     .stat span {
@@ -225,6 +229,90 @@
       border-radius: 8px;
     }
 
+    .shop {
+      margin-top: 16px;
+      padding: 12px;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      background: #eff6ff;
+    }
+
+    .shop-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .shop-head strong {
+      font-size: .95rem;
+    }
+
+    .coin-pill {
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: #fef3c7;
+      color: #713f12;
+      font-size: .82rem;
+      font-weight: 900;
+    }
+
+    .shop-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .shop-item {
+      display: grid;
+      grid-template-columns: 34px 1fr auto;
+      gap: 9px;
+      align-items: center;
+      min-height: 54px;
+      padding: 8px;
+      border: 1px solid #dbeafe;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .shop-swatch {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      color: #fff;
+      background: var(--item-color);
+      font-weight: 900;
+    }
+
+    .shop-item strong,
+    .shop-item small {
+      display: block;
+    }
+
+    .shop-item small {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: .74rem;
+    }
+
+    .shop-item button {
+      min-height: 34px;
+      padding: 7px 9px;
+      border-radius: 8px;
+      color: #fff;
+      background: var(--blue);
+      font-size: .78rem;
+      font-weight: 900;
+    }
+
+    .shop-item button:disabled {
+      cursor: default;
+      color: #64748b;
+      background: #e2e8f0;
+    }
+
     .bank-list {
       display: flex;
       flex-wrap: wrap;
@@ -246,15 +334,28 @@
     }
 
     .scene {
+      position: relative;
       display: grid;
       grid-template-columns: minmax(220px, 38%) 1fr;
       gap: 18px;
       padding: 22px;
-      background: linear-gradient(135deg, rgba(37, 99, 235, .09), rgba(15, 118, 110, .08));
+      background:
+        linear-gradient(135deg, color-mix(in srgb, var(--decor-accent) 14%, transparent), color-mix(in srgb, var(--decor-soft) 65%, transparent)),
+        #f8fbff;
       border-bottom: 1px solid var(--line);
     }
 
+    .scene::before {
+      content: "";
+      position: absolute;
+      inset: 14px;
+      border: 2px dashed color-mix(in srgb, var(--decor-accent) 32%, transparent);
+      border-radius: 8px;
+      pointer-events: none;
+    }
+
     .desk-art {
+      position: relative;
       min-height: 250px;
       border-radius: 8px;
       background: #f9f6ee;
@@ -262,6 +363,21 @@
       display: grid;
       place-items: center;
       overflow: hidden;
+    }
+
+    .desk-art::after {
+      content: attr(data-decor);
+      position: absolute;
+      right: 12px;
+      bottom: 10px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      color: #fff;
+      background: var(--decor-accent);
+      font-size: .78rem;
+      font-weight: 900;
+      letter-spacing: .04em;
+      text-transform: uppercase;
     }
 
     .desk-art svg {
@@ -299,6 +415,36 @@
 
     .workbench {
       padding: 22px;
+    }
+
+    .quest-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .quest-card {
+      min-height: 86px;
+      padding: 12px;
+      border: 1px solid #dbeafe;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .quest-card span {
+      display: block;
+      color: var(--muted);
+      font-size: .74rem;
+      font-weight: 850;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+    }
+
+    .quest-card strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 1.05rem;
     }
 
     .prompt-row {
@@ -978,7 +1124,8 @@
       .activity-footer,
       .progress-grid,
       .board-row,
-      .memory-grid {
+      .memory-grid,
+      .quest-strip {
         grid-template-columns: 1fr;
       }
 
@@ -1038,6 +1185,7 @@
         <div class="stat"><span>Profile</span><strong id="statProfile">Evelyn</strong></div>
         <div class="stat"><span>Round</span><strong id="statRound">1 / 10</strong></div>
         <div class="stat"><span>Stars</span><strong id="statStars">0</strong></div>
+        <div class="stat"><span>Coins</span><strong id="statCoins">0</strong></div>
       </div>
     </header>
 
@@ -1057,11 +1205,19 @@
           <div class="bank-list" id="wordBank"></div>
         </div>
 
+        <div class="shop" aria-label="Decoration shop">
+          <div class="shop-head">
+            <strong>Decoration Shop</strong>
+            <span class="coin-pill" id="shopCoins">0 coins</span>
+          </div>
+          <div class="shop-list" id="shopList"></div>
+        </div>
+
       </aside>
 
       <article class="practice">
         <section class="scene">
-          <div class="desk-art" aria-hidden="true">
+          <div class="desk-art" id="deskArt" data-decor="Starter desk" aria-hidden="true">
             <svg viewBox="0 0 520 360">
               <rect x="26" y="250" width="468" height="54" rx="14" fill="#c08457"></rect>
               <rect x="72" y="86" width="162" height="184" rx="12" fill="#2563eb"></rect>
@@ -1084,6 +1240,11 @@
         </section>
 
         <section class="workbench">
+          <div class="quest-strip" aria-label="Quest rewards">
+            <div class="quest-card"><span>Quest</span><strong id="questGoal">Finish this set</strong></div>
+            <div class="quest-card"><span>Reward</span><strong id="questReward">+30 coins</strong></div>
+            <div class="quest-card"><span>Arcade</span><strong id="questArcade">Unlock games</strong></div>
+          </div>
           <div class="prompt-row">
             <h3 id="questionTitle">Word Choice</h3>
             <span class="round-pill" id="roundPill">Round 1</span>
@@ -1501,6 +1662,14 @@
       sentence: ["sentence", "sentence-builder", "sentenceBuilder", "builder"]
     };
 
+    const decorationCatalog = [
+      { id: "starter", name: "Starter Desk", cost: 0, color: "#2563eb", soft: "#e0f2fe", icon: "S" },
+      { id: "rainbow", name: "Rainbow Lights", cost: 25, color: "#be123c", soft: "#ffe4e6", icon: "R" },
+      { id: "forest", name: "Forest Corner", cost: 40, color: "#0f766e", soft: "#ccfbf1", icon: "F" },
+      { id: "space", name: "Space Stickers", cost: 60, color: "#7c3aed", soft: "#ede9fe", icon: "P" },
+      { id: "gold", name: "Gold Trophy", cost: 85, color: "#b45309", soft: "#fef3c7", icon: "G" }
+    ];
+
     const icons = {
       choice: '<svg class="mode-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="m15 17 2 2 4-5" stroke="#4d7c0f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
       complete: '<svg class="mode-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="2"/><rect x="10" y="5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="2"/><rect x="17" y="5" width="4" height="5" rx="1" stroke="currentColor" stroke-width="2"/><path d="M4 17h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
@@ -1511,7 +1680,8 @@
     const storageKeys = {
       config: "vocabPracticeSupabaseConfig",
       progress: "vocabPracticeProgressReset20260525",
-      session: "vocabPracticeSessionReset20260525"
+      session: "vocabPracticeSessionReset20260525",
+      decorations: "vocabPracticeDecorations20260614"
     };
 
     function defaultWeekIndex() {
@@ -1545,6 +1715,7 @@
       config: loadConfig(),
       syncing: false,
       savedTo: "Local",
+      decorations: loadDecorations(),
       rewardGame: "word-search",
       reward: {
         searchSelected: [],
@@ -1570,6 +1741,13 @@
       statProfile: document.querySelector("#statProfile"),
       statRound: document.querySelector("#statRound"),
       statStars: document.querySelector("#statStars"),
+      statCoins: document.querySelector("#statCoins"),
+      shopCoins: document.querySelector("#shopCoins"),
+      shopList: document.querySelector("#shopList"),
+      deskArt: document.querySelector("#deskArt"),
+      questGoal: document.querySelector("#questGoal"),
+      questReward: document.querySelector("#questReward"),
+      questArcade: document.querySelector("#questArcade"),
       kicker: document.querySelector("#kicker"),
       modeTitle: document.querySelector("#modeTitle"),
       modeDescription: document.querySelector("#modeDescription"),
@@ -1616,6 +1794,26 @@
       } catch {
         return {};
       }
+    }
+
+    function loadDecorations() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKeys.decorations)) || {};
+        const base = Object.fromEntries(Object.keys(profiles).map((key) => [
+          key,
+          { owned: ["starter"], equipped: "starter" }
+        ]));
+        return { ...base, ...saved };
+      } catch {
+        return Object.fromEntries(Object.keys(profiles).map((key) => [
+          key,
+          { owned: ["starter"], equipped: "starter" }
+        ]));
+      }
+    }
+
+    function saveDecorations() {
+      localStorage.setItem(storageKeys.decorations, JSON.stringify(state.decorations));
     }
 
     function saveSession() {
@@ -1736,6 +1934,71 @@
       } catch {
         return {};
       }
+    }
+
+    function profileProgressRows(profileKey = state.profile) {
+      return Object.values(loadAllLocalProgress()).filter((row) => row?.learner === profileKey);
+    }
+
+    function earnedCoins(profileKey = state.profile) {
+      return profileProgressRows(profileKey).reduce((sum, row) => (
+        sum + Number(row.stars || 0) * 5 + badgeCountForRow(row) * 30
+      ), 0);
+    }
+
+    function spentCoins(profileKey = state.profile) {
+      const owned = state.decorations[profileKey]?.owned || ["starter"];
+      return owned.reduce((sum, id) => (
+        sum + (decorationCatalog.find((item) => item.id === id)?.cost || 0)
+      ), 0);
+    }
+
+    function availableCoins(profileKey = state.profile) {
+      return Math.max(0, earnedCoins(profileKey) - spentCoins(profileKey));
+    }
+
+    function currentDecoration(profileKey = state.profile) {
+      const profileShop = state.decorations[profileKey] || { owned: ["starter"], equipped: "starter" };
+      return decorationCatalog.find((item) => item.id === profileShop.equipped) || decorationCatalog[0];
+    }
+
+    function renderShop() {
+      if (!el.shopList) return;
+      const coins = availableCoins();
+      const profileShop = state.decorations[state.profile] || { owned: ["starter"], equipped: "starter" };
+      const decor = currentDecoration();
+      document.documentElement.style.setProperty("--decor-accent", decor.color);
+      document.documentElement.style.setProperty("--decor-soft", decor.soft);
+      if (el.deskArt) el.deskArt.dataset.decor = decor.name;
+      if (el.statCoins) el.statCoins.textContent = coins;
+      if (el.shopCoins) el.shopCoins.textContent = `${coins} coins`;
+      el.shopList.innerHTML = decorationCatalog.map((item) => {
+        const owned = profileShop.owned.includes(item.id);
+        const equipped = profileShop.equipped === item.id;
+        const disabled = equipped || (!owned && coins < item.cost);
+        const label = equipped ? "Equipped" : owned ? "Equip" : `${item.cost}`;
+        return `
+          <div class="shop-item" style="--item-color:${item.color}">
+            <span class="shop-swatch">${item.icon}</span>
+            <span><strong>${item.name}</strong><small>${owned ? "Owned" : `${item.cost} coins`}</small></span>
+            <button type="button" data-shop-item="${item.id}" ${disabled ? "disabled" : ""}>${label}</button>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function buyOrEquipDecoration(id) {
+      const item = decorationCatalog.find((entry) => entry.id === id);
+      if (!item) return;
+      const profileShop = state.decorations[state.profile] || { owned: ["starter"], equipped: "starter" };
+      if (!profileShop.owned.includes(id)) {
+        if (availableCoins() < item.cost) return;
+        profileShop.owned = [...profileShop.owned, id];
+      }
+      profileShop.equipped = id;
+      state.decorations[state.profile] = profileShop;
+      saveDecorations();
+      renderShop();
     }
 
     function familyBoardRows(progressOverride = null) {
@@ -2005,6 +2268,9 @@
       el.modeDescription.textContent = `${currentWeek().label}: ${currentWeek().theme}. ${mode.summary}`;
       el.questionTitle.textContent = mode.label;
       el.roundPill.textContent = `${currentWeek().label} · Round ${(state.index % words.length) + 1}`;
+      el.questGoal.textContent = state.completedSet ? "Set complete" : `Clear ${words.length} rounds`;
+      el.questReward.textContent = state.completedSet ? "Badge earned" : "+30 coins at finish";
+      el.questArcade.textContent = state.completedSet ? "Games unlocked" : "Win to unlock games";
       el.parentPrompt.textContent = profile.parentPrompt;
       el.writingBoost.textContent = profile.writingBoost;
       el.wordBank.innerHTML = words.map((item) => `<span class="chip">${item.word}</span>`).join("");
@@ -2016,6 +2282,7 @@
         ? `${state.lastAnswer.word}: ${answerText(state.lastAnswer) || "(blank)"} · ${state.lastAnswer.correct ? "correct" : "try again"}`
         : "No answers yet.";
       renderLeaderboard();
+      renderShop();
 
       [...el.profiles.children].forEach((button) => {
         button.setAttribute("aria-pressed", button.dataset.profile === state.profile);
@@ -2599,6 +2866,11 @@
     el.nextBtn.addEventListener("click", nextQuestion);
     el.clearBtn.addEventListener("click", clearCurrentQuestion);
     el.resetBtn.addEventListener("click", resetPractice);
+    el.shopList.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-shop-item]");
+      if (!button) return;
+      buyOrEquipDecoration(button.dataset.shopItem);
+    });
     el.reward.addEventListener("click", (event) => {
       const close = event.target.closest("[data-reward-close]");
       if (close) {
