@@ -118,6 +118,10 @@
       font-size: 1.2rem;
     }
 
+    .stat.combo strong {
+      color: var(--gold);
+    }
+
     .layout {
       display: grid;
       grid-template-columns: 280px 1fr;
@@ -524,6 +528,48 @@
       text-transform: uppercase;
     }
 
+    .arena-status {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .arena-status span {
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: #fef3c7;
+      color: #713f12;
+      font-size: .76rem;
+      font-weight: 900;
+    }
+
+    .power-burst {
+      position: absolute;
+      right: 18px;
+      top: 18px;
+      display: grid;
+      gap: 6px;
+      justify-items: end;
+      pointer-events: none;
+      animation: burstFloat 1.25s ease both;
+    }
+
+    .power-burst strong {
+      padding: 7px 10px;
+      border-radius: 999px;
+      color: #fff;
+      background: var(--decor-accent);
+      box-shadow: 0 8px 18px rgba(15, 23, 42, .16);
+    }
+
+    .sparkle-chip {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: #f59e0b;
+      animation: sparklePop .9s ease both;
+    }
+
     .question {
       margin: 0;
       font-size: clamp(1.35rem, 3vw, 2.2rem);
@@ -725,6 +771,18 @@
       0%, 100% { transform: translateX(0); }
       30% { transform: translateX(-4px); }
       60% { transform: translateX(4px); }
+    }
+
+    @keyframes burstFloat {
+      0% { opacity: 0; transform: translateY(8px) scale(.94); }
+      18% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-18px) scale(1.04); }
+    }
+
+    @keyframes sparklePop {
+      0% { opacity: 0; transform: scale(.3); }
+      35% { opacity: 1; transform: scale(1.25); }
+      100% { opacity: 0; transform: translateY(-18px) scale(.6); }
     }
 
     .feedback.good {
@@ -1272,6 +1330,7 @@
         <div class="stat"><span>Round</span><strong id="statRound">1 / 10</strong></div>
         <div class="stat"><span>Stars</span><strong id="statStars">0</strong></div>
         <div class="stat"><span>Coins</span><strong id="statCoins">0</strong></div>
+        <div class="stat combo"><span>Combo</span><strong id="statCombo">0</strong></div>
       </div>
     </header>
 
@@ -1799,6 +1858,7 @@
       checked: false,
       awarded: false,
       attemptCounted: false,
+      combo: 0,
       config: loadConfig(),
       syncing: false,
       savedTo: "Local",
@@ -1829,6 +1889,7 @@
       statRound: document.querySelector("#statRound"),
       statStars: document.querySelector("#statStars"),
       statCoins: document.querySelector("#statCoins"),
+      statCombo: document.querySelector("#statCombo"),
       shopCoins: document.querySelector("#shopCoins"),
       shopList: document.querySelector("#shopList"),
       deskArt: document.querySelector("#deskArt"),
@@ -2350,6 +2411,7 @@
       el.statProfile.textContent = profile.short;
       el.statRound.textContent = `${(state.index % words.length) + 1} / ${words.length}`;
       el.statStars.textContent = state.stars;
+      el.statCombo.textContent = state.combo;
       el.kicker.textContent = profile.grade;
       el.modeTitle.textContent = mode.title;
       el.modeDescription.textContent = `${currentWeek().label}: ${currentWeek().theme}. ${mode.summary}`;
@@ -2395,6 +2457,7 @@
       const item = currentWord();
       el.questionPanel.innerHTML = `
         <span class="mission-tag">Choose Power Word</span>
+        <div class="arena-status"><span>Combo x${state.combo}</span><span>${state.checked ? "Locked" : "Ready"}</span></div>
         <p class="question">${item.sentence}</p>
         <p class="hint">Clue: ${item.clue}</p>
         <div class="choices">${shuffle(item.choices).map(choiceButton).join("")}</div>
@@ -2410,6 +2473,7 @@
       const options = shuffle([item.clue, ...decoys]);
       el.questionPanel.innerHTML = `
         <span class="mission-tag">Match The Meaning</span>
+        <div class="arena-status"><span>Combo x${state.combo}</span><span>${state.checked ? "Locked" : "Ready"}</span></div>
         <p class="question">What does <strong>${item.word}</strong> mean?</p>
         <p class="hint">Read each choice carefully.</p>
         <div class="choices">${options.map((text) => {
@@ -2427,6 +2491,7 @@
       const slots = item.word.split("").map((_, index) => `<span class="slot">${state.built[index] || ""}</span>`).join("");
       el.questionPanel.innerHTML = `
         <span class="mission-tag">Build The Word</span>
+        <div class="arena-status"><span>Combo x${state.combo}</span><span>${state.built.length}/${item.word.length} letters</span></div>
         <p class="question">${blankWord(item.word)}</p>
         <p class="hint">Clue: ${item.clue}</p>
         <div class="spelling-board">
@@ -2440,6 +2505,7 @@
       const item = currentWord();
       el.questionPanel.innerHTML = `
         <span class="mission-tag">Type To Unlock</span>
+        <div class="arena-status"><span>Combo x${state.combo}</span><span>${state.checked ? "Locked" : "Ready"}</span></div>
         <p class="question">${item.sentence}</p>
         <p class="hint">Clue: ${item.clue}</p>
         <input class="type-answer" id="typedAnswer" type="text" autocomplete="off" spellcheck="false" placeholder="Type the missing word" value="${state.selected}">
@@ -2495,6 +2561,19 @@
       window.requestAnimationFrame(() => {
         el.questionPanel.classList.add(ok ? "good-flash" : "try-flash");
       });
+      showPowerBurst(ok);
+    }
+
+    function showPowerBurst(ok) {
+      const existing = el.questionPanel.querySelector(".power-burst");
+      if (existing) existing.remove();
+      const burst = document.createElement("div");
+      burst.className = "power-burst";
+      burst.innerHTML = ok
+        ? `<strong>Power +${Math.max(1, state.combo)}</strong><span class="sparkle-chip"></span><span class="sparkle-chip"></span><span class="sparkle-chip"></span>`
+        : `<strong>Try again</strong>`;
+      el.questionPanel.appendChild(burst);
+      window.setTimeout(() => burst.remove(), 1300);
     }
 
     function answerValue(item, ok) {
@@ -2832,6 +2911,7 @@
         state.attempts += 1;
         state.attemptCounted = true;
       }
+      state.combo = ok ? state.combo + 1 : 0;
       if (ok && !state.awarded) {
         state.stars += 1;
         state.correct += 1;
@@ -2840,9 +2920,9 @@
       state.lastAnswer = answerRecord;
       state.recentAnswers = [answerRecord, ...state.recentAnswers.filter((answer) => answer.answer_id !== answerRecord.answer_id)];
       const earnedBadge = awardSetBadgeIfEarned();
-      setFeedback(ok, item);
       if (state.mode === "choice") renderChoice();
       if (state.mode === "meaning") renderMeaning();
+      setFeedback(ok, item);
       updateChrome();
       await saveProgress(answerRecord);
       showCelebration(earnedBadge);
@@ -2850,6 +2930,7 @@
     }
 
     function previousQuestion() {
+      state.combo = 0;
       state.index = (state.index - 1 + currentWords().length) % currentWords().length;
       renderQuestion();
       saveProgress();
@@ -2869,6 +2950,7 @@
       if (isLastQuestion() && state.completedSet) {
         return;
       }
+      state.combo = 0;
       state.index = (state.index + 1) % currentWords().length;
       renderQuestion();
       saveProgress();
@@ -2900,6 +2982,7 @@
       state.badges = [];
       state.completedSet = false;
       state.completedAt = null;
+      state.combo = 0;
       renderQuestion();
       saveProgress();
     }
