@@ -1071,6 +1071,24 @@
       background: #f8fbff;
     }
 
+    .reward-start {
+      align-self: center;
+      justify-self: center;
+      display: grid;
+      gap: 12px;
+      max-width: 520px;
+      text-align: center;
+    }
+
+    .reward-start strong {
+      font-size: 1.2rem;
+    }
+
+    .reward-tabs button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
     .word-search-grid {
       display: grid;
       grid-template-columns: repeat(10, minmax(0, 1fr));
@@ -1816,6 +1834,8 @@
       { id: "gold", name: "Gold Trophy", cost: 85, color: "#b45309", soft: "#fef3c7", icon: "G" }
     ];
 
+    const rewardGameCost = 10;
+
     const icons = {
       choice: '<svg class="mode-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="m15 17 2 2 4-5" stroke="#4d7c0f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
       complete: '<svg class="mode-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="2"/><rect x="10" y="5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="2"/><rect x="17" y="5" width="4" height="5" rx="1" stroke="currentColor" stroke-width="2"/><path d="M4 17h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
@@ -1827,7 +1847,8 @@
       config: "vocabPracticeSupabaseConfig",
       progress: "vocabPracticeProgressReset20260525",
       session: "vocabPracticeSessionReset20260525",
-      decorations: "vocabPracticeDecorations20260614"
+      decorations: "vocabPracticeDecorations20260614",
+      arcade: "vocabPracticeArcadeSpending20260615"
     };
 
     function defaultWeekIndex() {
@@ -1863,7 +1884,9 @@
       syncing: false,
       savedTo: "Local",
       decorations: loadDecorations(),
-      rewardGame: "word-search",
+      arcadeSpending: loadArcadeSpending(),
+      rewardGame: null,
+      rewardMessage: "",
       reward: {
         searchSelected: [],
         searchFound: [],
@@ -1962,6 +1985,20 @@
 
     function saveDecorations() {
       localStorage.setItem(storageKeys.decorations, JSON.stringify(state.decorations));
+    }
+
+    function loadArcadeSpending() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKeys.arcade)) || {};
+        const base = Object.fromEntries(Object.keys(profiles).map((key) => [key, 0]));
+        return { ...base, ...saved };
+      } catch {
+        return Object.fromEntries(Object.keys(profiles).map((key) => [key, 0]));
+      }
+    }
+
+    function saveArcadeSpending() {
+      localStorage.setItem(storageKeys.arcade, JSON.stringify(state.arcadeSpending));
     }
 
     function saveSession() {
@@ -2096,9 +2133,10 @@
 
     function spentCoins(profileKey = state.profile) {
       const owned = state.decorations[profileKey]?.owned || ["starter"];
-      return owned.reduce((sum, id) => (
+      const decorationSpend = owned.reduce((sum, id) => (
         sum + (decorationCatalog.find((item) => item.id === id)?.cost || 0)
       ), 0);
+      return decorationSpend + Number(state.arcadeSpending[profileKey] || 0);
     }
 
     function availableCoins(profileKey = state.profile) {
@@ -2697,9 +2735,25 @@
       state.reward.catchScore = 0;
     }
 
+    function spendForRewardGame(game) {
+      if (availableCoins() < rewardGameCost) {
+        state.rewardMessage = `You need ${rewardGameCost} coins to play. Finish more questions or earn a badge first.`;
+        renderRewardGames();
+        return false;
+      }
+      state.arcadeSpending[state.profile] = Number(state.arcadeSpending[state.profile] || 0) + rewardGameCost;
+      saveArcadeSpending();
+      state.rewardMessage = `${currentProfile().short} spent ${rewardGameCost} coins to play.`;
+      resetRewardGame(game);
+      renderShop();
+      return true;
+    }
+
     function openRewardGames() {
       if (!el.reward) return;
-      resetRewardGame(state.rewardGame);
+      stopCatchGame();
+      state.rewardGame = null;
+      state.rewardMessage = `Choose a reward game. Each game costs ${rewardGameCost} coins.`;
       el.reward.classList.add("show");
       el.reward.setAttribute("aria-hidden", "false");
       renderRewardGames();
@@ -2714,6 +2768,8 @@
 
     function renderRewardGames() {
       if (!el.reward) return;
+      const coins = availableCoins();
+      const canPlay = coins >= rewardGameCost;
       el.reward.innerHTML = `
         <div class="reward-panel">
           <div class="reward-head">
@@ -2721,16 +2777,25 @@
             <button class="reward-close" type="button" data-reward-close>Close</button>
           </div>
           <div class="reward-tabs" role="tablist" aria-label="Reward games">
-            <button type="button" data-reward-game="word-search" aria-pressed="${state.rewardGame === "word-search"}">Word Search</button>
-            <button type="button" data-reward-game="memory" aria-pressed="${state.rewardGame === "memory"}">Memory Game</button>
-            <button type="button" data-reward-game="catch" aria-pressed="${state.rewardGame === "catch"}">Slide & Catch</button>
+            <button type="button" data-reward-game="word-search" aria-pressed="${state.rewardGame === "word-search"}" ${canPlay && state.rewardGame !== "word-search" ? "" : state.rewardGame === "word-search" ? "" : "disabled"}>Word Search - ${rewardGameCost}</button>
+            <button type="button" data-reward-game="memory" aria-pressed="${state.rewardGame === "memory"}" ${canPlay && state.rewardGame !== "memory" ? "" : state.rewardGame === "memory" ? "" : "disabled"}>Memory - ${rewardGameCost}</button>
+            <button type="button" data-reward-game="catch" aria-pressed="${state.rewardGame === "catch"}" ${canPlay && state.rewardGame !== "catch" ? "" : state.rewardGame === "catch" ? "" : "disabled"}>Slide & Catch - ${rewardGameCost}</button>
           </div>
+          <p class="hint">${state.rewardMessage || `${coins} coins available. Each game costs ${rewardGameCost} coins.`}</p>
           <div class="reward-board" id="rewardBoard">${renderRewardBoard()}</div>
         </div>
       `;
     }
 
     function renderRewardBoard() {
+      if (!state.rewardGame) {
+        return `
+          <div class="reward-start">
+            <strong>Arcade tickets are 10 coins each.</strong>
+            <p class="hint">${availableCoins()} coins available. Pick a game above to start.</p>
+          </div>
+        `;
+      }
       if (state.rewardGame === "memory") return renderMemoryGame();
       if (state.rewardGame === "catch") return renderCatchGame();
       return renderWordSearch();
@@ -3062,7 +3127,8 @@
 
       const game = event.target.closest("[data-reward-game]");
       if (game) {
-        resetRewardGame(game.dataset.rewardGame);
+        if (state.rewardGame === game.dataset.rewardGame) return;
+        if (!spendForRewardGame(game.dataset.rewardGame)) return;
         renderRewardGames();
         return;
       }
