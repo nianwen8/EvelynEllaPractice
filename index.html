@@ -1490,215 +1490,86 @@
       });
     }
 
-    function makeK12Entry(word, theme) {
-      const cleanTheme = theme.toLowerCase();
+    const k12ReaderWeeklyWords = {
+      1: [
+        { theme: "Sight words and -at family words", words: ["the", "of", "and", "that", "cat", "mat", "sat", "hat"] },
+        { theme: "Sight words and -an family words", words: ["to", "in", "is", "you", "man", "can", "ran", "pan"] },
+        { theme: "Sight words and -ap family words", words: ["than", "it", "he", "was", "map", "cap", "nap", "tap"] },
+        { theme: "Sight words and -ack family words", words: ["for", "on", "are", "as", "back", "sack", "black", "snack"] },
+        { theme: "Sight words and -it family words", words: ["with", "his", "they", "pit", "sit", "hit", "bit", "fit"] },
+        { theme: "Sight words and -ig family words", words: ["at", "be", "this", "have", "big", "pig", "dig", "wig"] },
+        { theme: "Sight words and -in family words", words: ["from", "or", "one", "had", "pin", "thin", "spin", "skin"] },
+        { theme: "Sight words and -ick family words", words: ["by", "words", "but", "not", "sick", "kick", "brick", "stick"] },
+        { theme: "Sight words and -ot family words", words: ["what", "all", "were", "we", "hot", "pot", "not", "lot"] },
+        { theme: "Sight words and -op family words", words: ["when", "your", "pop", "said", "mop", "top", "hop", "drop"] }
+      ],
+      2: [
+        { theme: "Sight words, r-controlled a, and academic vocabulary", words: ["over", "new", "art", "take", "only", "car", "park", "hard", "barn", "card", "shark", "dark", "oh", "eyes", "date", "hold"] },
+        { theme: "Sight words, -ai- pattern, and academic vocabulary", words: ["little", "work", "know", "place", "years", "rain", "mail", "wait", "paint", "chant", "paid", "sail", "goods", "services", "consumer", "producer"] },
+        { theme: "Sight words, -aw pattern, and academic vocabulary", words: ["live", "me", "cool", "give", "most", "saw", "law", "raw", "jar", "straw", "draw", "country", "ocean", "title", "skip", "change"] },
+        { theme: "Sight words, r-controlled i, and academic vocabulary", words: ["very", "after", "things", "our", "just", "girl", "dirt", "shirt", "third", "thirst", "birth", "yellow", "add", "got", "life", "cycle"] },
+        { theme: "Sight words, -ight pattern, and academic vocabulary", words: ["pole", "wire", "fight", "seen", "eat", "right", "might", "sight", "tight", "flight", "bright", "lost", "far", "push", "pull", "resource"] },
+        { theme: "Sight words, -ol- pattern, and academic vocabulary", words: ["say", "great", "four", "help", "through", "gold", "cold", "fold", "mold", "sold", "told", "subtract", "answer", "baby", "parent", "stages"] },
+        { theme: "Sight words, -ou- pattern, and academic vocabulary", words: ["late", "before", "line", "side", "too", "loud", "round", "found", "shout", "count", "gave", "urban", "suburban", "rural", "community", "touch"] },
+        { theme: "Sight words, -ue pattern, and academic vocabulary", words: ["means", "old", "any", "same", "corn", "blue", "true", "clue", "glue", "due", "argue", "listen", "song", "cause", "speak", "kind"] },
+        { theme: "Sight words, r-controlled u, and academic vocabulary", words: ["boy", "soon", "came", "want", "eggs", "nurse", "curve", "turn", "burn", "curl", "purse", "growth", "affect", "fish", "mammal", "fruit"] },
+        { theme: "Sight words, long ea pattern, and academic vocabulary", words: ["also", "beat", "seat", "three", "small", "mean", "clean", "peak", "dream", "beach", "team", "length", "weight", "height", "meat", "distance"] }
+      ],
+      3: [
+        { theme: "Sight words, short a/e words, and academic vocabulary", words: ["high", "every", "near", "west", "dress", "best", "next", "else", "checked", "grand", "stand", "punish", "monarch", "migrate", "butterfly", "nectar"] },
+        { theme: "Sight words, short i/o/u words, and academic vocabulary", words: ["between", "own", "base", "country", "plant", "slip", "lunch", "pond", "front", "thump", "inches", "yard", "area", "formula", "width", "calculate"] },
+        { theme: "Sight words, long a/e words, and academic vocabulary", words: ["save", "school", "father", "keep", "safe", "grade", "reached", "raise", "theme", "scream", "easy", "highway", "navigate", "ocean", "travel", "direction"] },
+        { theme: "Sight words, long i/o words, and academic vocabulary", words: ["trade", "start", "city", "earth", "hope", "stone", "follow", "broke", "sign", "tiny", "whole", "wave", "current", "electric", "science", "round"] },
+        { theme: "Sight words, blends st/str, and academic vocabulary", words: ["upon", "thought", "gun", "strong", "story", "burst", "strip", "stream", "street", "distance", "least", "hundred", "east", "zero", "nothing", "amount"] },
+        { theme: "Sight words, kn/wr words, and academic vocabulary", words: ["cried", "dried", "milk", "let's", "while", "known", "knife", "knock", "wrong", "knot", "wrinkle", "wrap", "wrist", "knee", "aloud", "express"] },
+        { theme: "Sight words, gh/ph words, and academic vocabulary", words: ["along", "bought", "close", "something", "seem", "laughed", "lady", "enough", "graph", "paragraph", "photograph", "history", "village", "future", "hometown", "settlers"] },
+        { theme: "Sight words, ch/tch words, and academic vocabulary", words: ["cloud", "child", "open", "example", "begin", "chance", "match", "watch", "batch", "steel", "speech", "source", "material", "ditch", "women", "iron"] },
+        { theme: "Sight words, sh words, and academic vocabulary", words: ["can't", "shall", "those", "both", "paper", "pushed", "sharp", "shock", "crash", "showed", "shoes", "shoulder", "product", "quotient", "multiplication", "division"] },
+        { theme: "Sight words, s sound of c, and academic vocabulary", words: ["together", "tied", "group", "often", "table", "space", "fence", "price", "office", "police", "pencil", "civil", "tribal", "buffalo", "dance", "plains"] }
+      ],
+      4: [
+        { theme: "Sight words, schwa n, and academic vocabulary", words: ["rolled", "finger", "except", "speed", "couldn't", "eleven", "catch", "itself", "stolen", "button", "bargain", "certain", "orphan", "opinion", "oxen", "latitude", "longitude", "compass", "absolute", "equator"] },
+        { theme: "Sight words, schwa n, and academic vocabulary", words: ["yourself", "maybe", "veteran", "complete", "rather", "crowd", "since", "fresh", "piece", "cotton", "colon", "rainforest", "heaven", "satin", "penguin", "tropical", "organism", "ecosystem", "community", "reproduce"] },
+        { theme: "Sight words, schwa n, and academic vocabulary", words: ["usually", "character", "friend", "whom", "heard", "order", "villain", "basin", "carton", "become", "muffin", "pumpkin", "deposit", "cannon", "poison", "origin", "prime", "elbow", "perch", "shorten"] },
+        { theme: "Sight words, al/il, and academic vocabulary", words: ["twelve", "proverb", "across", "today", "during", "metaphor", "simile", "quiz", "pupil", "proposal", "bridal", "dental", "gerbil", "nasal", "postal", "hemisphere", "immigrant", "passage", "population", "pioneer"] },
+        { theme: "Sight words, al/il, and academic vocabulary", words: ["stencil", "twenty", "tranquil", "happened", "whine", "fossil", "remember", "early", "utensil", "mortal", "normal", "mental", "neutral", "partial", "council", "eclipse", "diamond", "corona", "retain", "resist"] },
+        { theme: "Sight words, ile/il, and academic vocabulary", words: ["thirty", "synonym", "antonym", "emotion", "covered", "anyone", "several", "juvenile", "reptile", "toward", "fragile", "hostile", "mobile", "tonsil", "evil", "movement", "depend", "destroy", "celebrate", "factory"] },
+        { theme: "Sight words, al/el, and academic vocabulary", words: ["bytes", "extend", "keyboard", "monitor", "vowel", "portal", "tunnel", "against", "channel", "numerical", "fatal", "oval", "towel", "chapel", "tinsel", "dispersal", "compatible", "pattern", "sequence", "determine"] },
+        { theme: "Sight words, le pattern, and academic vocabulary", words: ["lettuce", "spinach", "slowly", "squash", "carrot", "onion", "jungle", "crumble", "cable", "puzzle", "ankle", "freckle", "knuckle", "sprinkle", "dimple", "camouflage", "habitat", "prey", "imitate", "predator"] },
+        { theme: "Sight words, ure pattern, and academic vocabulary", words: ["thirteen", "appoint", "discuss", "demand", "request", "relief", "structure", "signature", "furniture", "departure", "capture", "miniature", "creature", "fixture", "figure", "continent", "railroad", "architecture", "view", "transportation"] },
+        { theme: "Sight words, cher pattern, and academic vocabulary", words: ["fourteen", "plenty", "relax", "bureau", "plateau", "field", "clause", "sentence", "sketch", "rancher", "bleacher", "richer", "voucher", "pitcher", "catcher", "earthquake", "scale", "tremor", "fault", "crust"] }
+      ]
+    };
+
+    function makeK12Entry(word, grade, week, theme, position) {
       return {
         word,
-        clue: `a ${cleanTheme} spelling word`,
-        sentence: `This week's ${cleanTheme} word is ___.`,
+        clue: `K12Reader Grade ${grade} Week ${week}, word ${position + 1}: ${theme}`,
+        sentence: `Practice the K12Reader spelling word: ___.`,
         synonym: "practice word",
         antonym: "different word"
       };
     }
 
-    function makeK12Week(label, theme, words) {
+    function makeK12Week(grade, weekIndex) {
+      const source = k12ReaderWeeklyWords[grade][weekIndex];
       return {
-        label,
-        theme: `K12Reader ${theme}`,
-        words: buildWordSet(words.map((word) => makeK12Entry(word, theme)))
+        label: `Grade ${grade} Week ${weekIndex + 1}`,
+        theme: `K12Reader ${source.theme}`,
+        words: buildWordSet(source.words.map((word, index) => makeK12Entry(word, grade, weekIndex + 1, source.theme, index)))
       };
     }
 
     const k12Sets = {
       ella: [
-        {
-          label: "Grade 1 Week 1",
-          theme: "K12Reader Sight Words and -at Family",
-          words: buildWordSet([
-            { word: "the", clue: "a word that points to a certain thing", sentence: "I read ___ book with Mom.", synonym: "that", antonym: "a" },
-            { word: "of", clue: "belonging to or connected with something", sentence: "The top ___ the box is blue.", synonym: "from", antonym: "apart" },
-            { word: "and", clue: "used to join words or ideas", sentence: "Ella has a pencil ___ paper.", synonym: "plus", antonym: "or" },
-            { word: "that", clue: "used to point to one thing", sentence: "I like ___ red hat.", synonym: "that one", antonym: "this" },
-            { word: "cat", clue: "a small pet that says meow", sentence: "The ___ sat by the window.", synonym: "kitten", antonym: "dog" },
-            { word: "mat", clue: "a small rug for the floor", sentence: "Put your shoes on the ___.", synonym: "rug", antonym: "floor" },
-            { word: "sat", clue: "rested on a chair or the floor", sentence: "The child ___ on the bench.", synonym: "rested", antonym: "stood" },
-            { word: "hat", clue: "something worn on the head", sentence: "My ___ keeps the sun away.", synonym: "cap", antonym: "barehead" }
-          ])
-        },
-        {
-          label: "Grade 1 Week 2",
-          theme: "K12Reader Sight Words and -an Family",
-          words: buildWordSet([
-            { word: "to", clue: "toward a place or person", sentence: "We walk ___ school.", synonym: "toward", antonym: "from" },
-            { word: "in", clue: "inside something", sentence: "The pen is ___ the box.", synonym: "inside", antonym: "out" },
-            { word: "is", clue: "a word that tells what something does or feels like now", sentence: "The sky ___ blue.", synonym: "exists", antonym: "is not" },
-            { word: "you", clue: "the person being spoken to", sentence: "Can ___ help me read?", synonym: "yourself", antonym: "me" },
-            { word: "man", clue: "a grown-up boy", sentence: "The ___ waved hello.", synonym: "adult", antonym: "child" },
-            { word: "can", clue: "to be able to do something", sentence: "I ___ spell this word.", synonym: "able", antonym: "cannot" },
-            { word: "ran", clue: "moved fast on feet", sentence: "The dog ___ across the yard.", synonym: "raced", antonym: "walked" },
-            { word: "pan", clue: "a dish used for cooking", sentence: "Dad cooked eggs in a ___.", synonym: "skillet", antonym: "plate" }
-          ])
-        },
-        {
-          label: "Grade 2 Week 1",
-          theme: "K12Reader R-Controlled A and Academic Words",
-          words: buildWordSet([
-            { word: "over", clue: "above or across something", sentence: "The bird flew ___ the tree.", synonym: "above", antonym: "under" },
-            { word: "new", clue: "not old or used before", sentence: "Ella opened a ___ notebook.", synonym: "fresh", antonym: "old" },
-            { word: "art", clue: "pictures, painting, or creative work", sentence: "We made ___ with crayons.", synonym: "craft", antonym: "blank" },
-            { word: "take", clue: "to pick up or carry with you", sentence: "Please ___ your coat.", synonym: "bring", antonym: "leave" },
-            { word: "only", clue: "just one or no more than", sentence: "There is ___ one cookie left.", synonym: "just", antonym: "many" },
-            { word: "car", clue: "a vehicle that drives on roads", sentence: "The ___ stopped at the light.", synonym: "auto", antonym: "bicycle" },
-            { word: "park", clue: "a place to play outside", sentence: "We went to the ___ after lunch.", synonym: "playground", antonym: "indoors" },
-            { word: "hard", clue: "not soft or not easy", sentence: "The spelling word was ___ at first.", synonym: "difficult", antonym: "easy" },
-            { word: "barn", clue: "a farm building for animals or hay", sentence: "The horse walked into the ___.", synonym: "stable", antonym: "house" },
-            { word: "card", clue: "a small paper used for games or messages", sentence: "I wrote a birthday ___.", synonym: "note", antonym: "book" }
-          ])
-        },
-        {
-          label: "Grade 2 Week 2",
-          theme: "K12Reader AI Pattern and Academic Words",
-          words: buildWordSet([
-            { word: "little", clue: "small in size", sentence: "The ___ bird hopped on the branch.", synonym: "small", antonym: "big" },
-            { word: "work", clue: "a job or task to do", sentence: "We finished our math ___.", synonym: "task", antonym: "play" },
-            { word: "know", clue: "to understand or remember", sentence: "I ___ how to spell rain.", synonym: "understand", antonym: "forget" },
-            { word: "place", clue: "a spot or location", sentence: "This is a good ___ to read.", synonym: "spot", antonym: "nowhere" },
-            { word: "years", clue: "more than one year", sentence: "She has lived here for two ___.", synonym: "ages", antonym: "days" },
-            { word: "rain", clue: "water that falls from clouds", sentence: "The ___ made puddles outside.", synonym: "shower", antonym: "sunshine" },
-            { word: "mail", clue: "letters or packages sent to people", sentence: "We checked the ___ after school.", synonym: "letters", antonym: "trash" },
-            { word: "wait", clue: "to stay until something happens", sentence: "Please ___ for your turn.", synonym: "pause", antonym: "rush" },
-            { word: "paint", clue: "colored liquid used to make pictures", sentence: "Ella used blue ___ for the sky.", synonym: "color", antonym: "erase" },
-            { word: "chant", clue: "to say words again and again", sentence: "The class did a spelling ___.", synonym: "repeat", antonym: "whisper" }
-          ])
-        }
+        ...k12ReaderWeeklyWords[1].map((_, index) => makeK12Week(1, index)),
+        ...k12ReaderWeeklyWords[2].map((_, index) => makeK12Week(2, index))
       ],
       evelyn: [
-        {
-          label: "Grade 3 Week 1",
-          theme: "K12Reader Short A/E and Academic Words",
-          words: buildWordSet([
-            { word: "high", clue: "far above the ground", sentence: "The kite flew ___ in the sky.", synonym: "tall", antonym: "low" },
-            { word: "every", clue: "each one in a group", sentence: "We read ___ word carefully.", synonym: "each", antonym: "none" },
-            { word: "near", clue: "not far away", sentence: "The desk is ___ the window.", synonym: "close", antonym: "far" },
-            { word: "west", clue: "the direction where the sun sets", sentence: "The map shows mountains in the ___.", synonym: "leftward", antonym: "east" },
-            { word: "dress", clue: "clothing worn as one piece", sentence: "The blue ___ had tiny flowers.", synonym: "gown", antonym: "pants" },
-            { word: "best", clue: "better than all the others", sentence: "Evelyn chose her ___ idea.", synonym: "top", antonym: "worst" },
-            { word: "next", clue: "coming right after this one", sentence: "The ___ chapter starts tomorrow.", synonym: "following", antonym: "previous" },
-            { word: "else", clue: "in addition or instead", sentence: "What ___ should we pack?", synonym: "other", antonym: "same" },
-            { word: "checked", clue: "looked at something to make sure", sentence: "She ___ her answer before clicking next.", synonym: "reviewed", antonym: "ignored" },
-            { word: "grand", clue: "large, impressive, or important", sentence: "The museum had a ___ staircase.", synonym: "great", antonym: "plain" }
-          ])
-        },
-        {
-          label: "Grade 3 Week 2",
-          theme: "K12Reader Short I/O/U and Academic Words",
-          words: buildWordSet([
-            { word: "between", clue: "in the space separating two things", sentence: "The book is ___ the lamp and the cup.", synonym: "among", antonym: "outside" },
-            { word: "own", clue: "belonging to yourself", sentence: "Evelyn wrote her ___ ending.", synonym: "personal", antonym: "shared" },
-            { word: "base", clue: "the bottom or main support", sentence: "The statue has a stone ___.", synonym: "foundation", antonym: "top" },
-            { word: "country", clue: "a nation or land with its own government", sentence: "Canada is a ___ north of the United States.", synonym: "nation", antonym: "city" },
-            { word: "plant", clue: "a living thing with roots and leaves", sentence: "The ___ grew toward the light.", synonym: "seedling", antonym: "animal" },
-            { word: "slip", clue: "to slide by accident", sentence: "Be careful not to ___ on the wet floor.", synonym: "slide", antonym: "grip" },
-            { word: "lunch", clue: "a meal eaten in the middle of the day", sentence: "We packed noodles for ___.", synonym: "meal", antonym: "breakfast" },
-            { word: "pond", clue: "a small body of water", sentence: "Frogs croaked near the ___.", synonym: "pool", antonym: "desert" },
-            { word: "front", clue: "the part that faces forward", sentence: "The title is on the ___ cover.", synonym: "face", antonym: "back" },
-            { word: "thump", clue: "a heavy bumping sound", sentence: "We heard a ___ when the book fell.", synonym: "bump", antonym: "silence" }
-          ])
-        },
-        {
-          label: "Grade 4 Week 1",
-          theme: "K12Reader Schwa N and Academic Words",
-          words: buildWordSet([
-            { word: "rolled", clue: "moved by turning over and over", sentence: "The ball ___ down the hill.", synonym: "tumbled", antonym: "stopped" },
-            { word: "finger", clue: "one of the parts at the end of a hand", sentence: "She raised one ___ to answer.", synonym: "digit", antonym: "toe" },
-            { word: "except", clue: "not including", sentence: "Everyone came ___ Ben.", synonym: "besides", antonym: "including" },
-            { word: "speed", clue: "how fast something moves", sentence: "The runner increased her ___.", synonym: "pace", antonym: "slowness" },
-            { word: "eleven", clue: "the number after ten", sentence: "There were ___ pencils in the box.", synonym: "11", antonym: "ten" },
-            { word: "catch", clue: "to grab something moving", sentence: "Can you ___ the ball?", synonym: "grab", antonym: "drop" },
-            { word: "itself", clue: "that very thing alone", sentence: "The door closed by ___.", synonym: "alone", antonym: "another" },
-            { word: "stolen", clue: "taken without permission", sentence: "The ___ bike was returned.", synonym: "taken", antonym: "returned" },
-            { word: "button", clue: "a small fastener on clothing", sentence: "The coat lost one ___.", synonym: "fastener", antonym: "hole" },
-            { word: "bargain", clue: "a good deal or low price", sentence: "The book was a ___ at the sale.", synonym: "deal", antonym: "overcharge" }
-          ])
-        },
-        {
-          label: "Grade 4 Week 2",
-          theme: "K12Reader Schwa N and Academic Words",
-          words: buildWordSet([
-            { word: "yourself", clue: "you, not someone else", sentence: "Try solving it by ___.", synonym: "alone", antonym: "others" },
-            { word: "maybe", clue: "possibly but not surely", sentence: "___ we can visit the library.", synonym: "perhaps", antonym: "certainly" },
-            { word: "veteran", clue: "a person with long experience or military service", sentence: "The ___ spoke at school.", synonym: "expert", antonym: "beginner" },
-            { word: "complete", clue: "having all parts finished", sentence: "Her paragraph was ___.", synonym: "finished", antonym: "incomplete" },
-            { word: "rather", clue: "somewhat or instead", sentence: "The puzzle was ___ tricky.", synonym: "quite", antonym: "barely" },
-            { word: "crowd", clue: "a large group of people", sentence: "A ___ waited near the stage.", synonym: "group", antonym: "individual" },
-            { word: "since", clue: "from a time in the past until now", sentence: "She has practiced ___ Monday.", synonym: "after", antonym: "before" },
-            { word: "fresh", clue: "new, clean, or recently made", sentence: "The bakery smelled like ___ bread.", synonym: "new", antonym: "stale" },
-            { word: "piece", clue: "one part of something", sentence: "May I have a ___ of paper?", synonym: "part", antonym: "whole" },
-            { word: "cotton", clue: "soft fiber used to make cloth", sentence: "The shirt was made of ___.", synonym: "fiber", antonym: "metal" }
-          ])
-        }
+        ...k12ReaderWeeklyWords[3].map((_, index) => makeK12Week(3, index)),
+        ...k12ReaderWeeklyWords[4].map((_, index) => makeK12Week(4, index))
       ]
     };
-
-    const k12ExtraWeeks = {
-      grade1: [
-        makeK12Week("Grade 1 Week 3", "Short I Word Families", ["it", "sit", "hit", "bit", "fit", "pin", "win", "fin", "bin", "tin"]),
-        makeK12Week("Grade 1 Week 4", "Short O Word Families", ["on", "not", "hot", "pot", "top", "hop", "mop", "dog", "log", "fog"]),
-        makeK12Week("Grade 1 Week 5", "Short U Word Families", ["up", "cup", "pup", "sun", "run", "fun", "bug", "rug", "hug", "mud"]),
-        makeK12Week("Grade 1 Week 6", "Long A and Silent E", ["make", "take", "cake", "game", "name", "same", "late", "gate", "plate", "bake"]),
-        makeK12Week("Grade 1 Week 7", "Long I and Silent E", ["like", "bike", "hike", "time", "line", "mine", "five", "hide", "ride", "kite"]),
-        makeK12Week("Grade 1 Week 8", "Long O and Silent E", ["home", "hope", "rope", "note", "stone", "cone", "bone", "rose", "hose", "joke"]),
-        makeK12Week("Grade 1 Week 9", "Consonant Blends", ["blue", "black", "flag", "frog", "spin", "stop", "clap", "drum", "trip", "grass"]),
-        makeK12Week("Grade 1 Week 10", "Digraphs", ["ship", "shop", "fish", "dish", "this", "that", "thin", "path", "chip", "much"])
-      ],
-      grade2: [
-        makeK12Week("Grade 2 Week 3", "Long E Patterns", ["green", "three", "sleep", "keep", "feet", "team", "dream", "clean", "read", "seat"]),
-        makeK12Week("Grade 2 Week 4", "Long O Patterns", ["boat", "coat", "road", "soap", "goat", "snow", "grow", "show", "slow", "window"]),
-        makeK12Week("Grade 2 Week 5", "Long I Patterns", ["light", "night", "right", "bright", "high", "sigh", "pie", "tie", "fly", "sky"]),
-        makeK12Week("Grade 2 Week 6", "R-Controlled ER IR UR", ["her", "fern", "term", "bird", "girl", "first", "shirt", "turn", "hurt", "curl"]),
-        makeK12Week("Grade 2 Week 7", "OO and EW Patterns", ["moon", "soon", "food", "room", "spoon", "book", "look", "cook", "new", "flew"]),
-        makeK12Week("Grade 2 Week 8", "OU and OW Patterns", ["out", "shout", "cloud", "round", "sound", "cow", "how", "now", "brown", "flower"]),
-        makeK12Week("Grade 2 Week 9", "Compound Words", ["bedroom", "sunset", "inside", "outside", "playground", "raincoat", "baseball", "cupcake", "mailbox", "football"]),
-        makeK12Week("Grade 2 Week 10", "Suffixes", ["jumped", "helped", "looked", "playing", "walking", "helper", "teacher", "kindly", "careful", "hopeful"])
-      ],
-      grade3: [
-        makeK12Week("Grade 3 Week 3", "Long Vowel Review", ["float", "dream", "speech", "bright", "throat", "coach", "remain", "season", "between", "approach"]),
-        makeK12Week("Grade 3 Week 4", "R-Controlled Vowels", ["sharp", "artist", "march", "storm", "porch", "north", "serve", "person", "circle", "purple"]),
-        makeK12Week("Grade 3 Week 5", "Diphthongs", ["amount", "around", "ground", "found", "south", "voice", "choice", "noise", "point", "join"]),
-        makeK12Week("Grade 3 Week 6", "Prefixes", ["unhappy", "replay", "preheat", "disagree", "rewrite", "unlock", "preview", "misread", "return", "unfair"]),
-        makeK12Week("Grade 3 Week 7", "Suffix ED ING ER", ["planned", "dropped", "slipped", "running", "swimming", "writer", "farmer", "teacher", "bigger", "smaller"]),
-        makeK12Week("Grade 3 Week 8", "Plural Endings", ["boxes", "dishes", "wishes", "babies", "puppies", "cities", "leaves", "knives", "wolves", "halves"]),
-        makeK12Week("Grade 3 Week 9", "Contractions", ["can't", "won't", "don't", "isn't", "aren't", "I'm", "you're", "we're", "they're", "that's"]),
-        makeK12Week("Grade 3 Week 10", "Homophones", ["there", "their", "they're", "to", "too", "two", "right", "write", "hear", "here"])
-      ],
-      grade4: [
-        makeK12Week("Grade 4 Week 3", "Long Vowel Teams", ["explain", "remain", "complain", "repeat", "increase", "receive", "believe", "neighbor", "freight", "weight"]),
-        makeK12Week("Grade 4 Week 4", "R-Controlled and Schwa", ["calendar", "grammar", "regular", "popular", "dollar", "visitor", "doctor", "actor", "mirror", "error"]),
-        makeK12Week("Grade 4 Week 5", "Prefixes and Roots", ["preview", "prepare", "disconnect", "misplace", "subway", "transfer", "portable", "support", "transport", "inspect"]),
-        makeK12Week("Grade 4 Week 6", "Suffixes", ["hopeful", "careless", "quickly", "movement", "payment", "kindness", "darkness", "creative", "active", "famous"]),
-        makeK12Week("Grade 4 Week 7", "Multisyllable Words", ["important", "different", "favorite", "possible", "remember", "animal", "library", "history", "million", "company"]),
-        makeK12Week("Grade 4 Week 8", "Consonant Changes", ["medicine", "decimal", "certain", "center", "cycle", "city", "gentle", "giant", "engine", "danger"]),
-        makeK12Week("Grade 4 Week 9", "Greek and Latin Roots", ["telephone", "photograph", "autograph", "biology", "geology", "export", "import", "predict", "dictate", "inspect"]),
-        makeK12Week("Grade 4 Week 10", "Challenge Words", ["knowledge", "question", "although", "thoughtful", "neighbor", "straight", "throughout", "beautiful", "experience", "favorite"])
-      ]
-    };
-
-    k12Sets.ella = [
-      k12Sets.ella[0],
-      k12Sets.ella[1],
-      ...k12ExtraWeeks.grade1,
-      k12Sets.ella[2],
-      k12Sets.ella[3],
-      ...k12ExtraWeeks.grade2
-    ];
-    k12Sets.evelyn = [
-      k12Sets.evelyn[0],
-      k12Sets.evelyn[1],
-      ...k12ExtraWeeks.grade3,
-      k12Sets.evelyn[2],
-      k12Sets.evelyn[3],
-      ...k12ExtraWeeks.grade4
-    ];
 
     const profiles = {
       evelyn: {
