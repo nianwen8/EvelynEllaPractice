@@ -1479,6 +1479,148 @@
       supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmdmR3cWhvaXRrbnhueGR3c3RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2NjcwMjYsImV4cCI6MjA5NTI0MzAyNn0.bHT3K_cOdhvWaor-kZ6mhDDPYpaYr8ELufFlW0oWB3c"
     };
 
+    function buildWordSet(entries) {
+      return entries.map((entry, index) => {
+        const choices = [entry.word];
+        for (let offset = 1; choices.length < 4 && offset < entries.length; offset += 1) {
+          const candidate = entries[(index + offset) % entries.length].word;
+          if (!choices.includes(candidate)) choices.push(candidate);
+        }
+        return { synonym: "similar word", antonym: "opposite word", ...entry, choices };
+      });
+    }
+
+    const k12Sets = {
+      ella: [
+        {
+          label: "Grade 1 Week 1",
+          theme: "K12Reader Sight Words and -at Family",
+          words: buildWordSet([
+            { word: "the", clue: "a word that points to a certain thing", sentence: "I read ___ book with Mom.", synonym: "that", antonym: "a" },
+            { word: "of", clue: "belonging to or connected with something", sentence: "The top ___ the box is blue.", synonym: "from", antonym: "apart" },
+            { word: "and", clue: "used to join words or ideas", sentence: "Ella has a pencil ___ paper.", synonym: "plus", antonym: "or" },
+            { word: "that", clue: "used to point to one thing", sentence: "I like ___ red hat.", synonym: "that one", antonym: "this" },
+            { word: "cat", clue: "a small pet that says meow", sentence: "The ___ sat by the window.", synonym: "kitten", antonym: "dog" },
+            { word: "mat", clue: "a small rug for the floor", sentence: "Put your shoes on the ___.", synonym: "rug", antonym: "floor" },
+            { word: "sat", clue: "rested on a chair or the floor", sentence: "The child ___ on the bench.", synonym: "rested", antonym: "stood" },
+            { word: "hat", clue: "something worn on the head", sentence: "My ___ keeps the sun away.", synonym: "cap", antonym: "barehead" }
+          ])
+        },
+        {
+          label: "Grade 1 Week 2",
+          theme: "K12Reader Sight Words and -an Family",
+          words: buildWordSet([
+            { word: "to", clue: "toward a place or person", sentence: "We walk ___ school.", synonym: "toward", antonym: "from" },
+            { word: "in", clue: "inside something", sentence: "The pen is ___ the box.", synonym: "inside", antonym: "out" },
+            { word: "is", clue: "a word that tells what something does or feels like now", sentence: "The sky ___ blue.", synonym: "exists", antonym: "is not" },
+            { word: "you", clue: "the person being spoken to", sentence: "Can ___ help me read?", synonym: "yourself", antonym: "me" },
+            { word: "man", clue: "a grown-up boy", sentence: "The ___ waved hello.", synonym: "adult", antonym: "child" },
+            { word: "can", clue: "to be able to do something", sentence: "I ___ spell this word.", synonym: "able", antonym: "cannot" },
+            { word: "ran", clue: "moved fast on feet", sentence: "The dog ___ across the yard.", synonym: "raced", antonym: "walked" },
+            { word: "pan", clue: "a dish used for cooking", sentence: "Dad cooked eggs in a ___.", synonym: "skillet", antonym: "plate" }
+          ])
+        },
+        {
+          label: "Grade 2 Week 1",
+          theme: "K12Reader R-Controlled A and Academic Words",
+          words: buildWordSet([
+            { word: "over", clue: "above or across something", sentence: "The bird flew ___ the tree.", synonym: "above", antonym: "under" },
+            { word: "new", clue: "not old or used before", sentence: "Ella opened a ___ notebook.", synonym: "fresh", antonym: "old" },
+            { word: "art", clue: "pictures, painting, or creative work", sentence: "We made ___ with crayons.", synonym: "craft", antonym: "blank" },
+            { word: "take", clue: "to pick up or carry with you", sentence: "Please ___ your coat.", synonym: "bring", antonym: "leave" },
+            { word: "only", clue: "just one or no more than", sentence: "There is ___ one cookie left.", synonym: "just", antonym: "many" },
+            { word: "car", clue: "a vehicle that drives on roads", sentence: "The ___ stopped at the light.", synonym: "auto", antonym: "bicycle" },
+            { word: "park", clue: "a place to play outside", sentence: "We went to the ___ after lunch.", synonym: "playground", antonym: "indoors" },
+            { word: "hard", clue: "not soft or not easy", sentence: "The spelling word was ___ at first.", synonym: "difficult", antonym: "easy" },
+            { word: "barn", clue: "a farm building for animals or hay", sentence: "The horse walked into the ___.", synonym: "stable", antonym: "house" },
+            { word: "card", clue: "a small paper used for games or messages", sentence: "I wrote a birthday ___.", synonym: "note", antonym: "book" }
+          ])
+        },
+        {
+          label: "Grade 2 Week 2",
+          theme: "K12Reader AI Pattern and Academic Words",
+          words: buildWordSet([
+            { word: "little", clue: "small in size", sentence: "The ___ bird hopped on the branch.", synonym: "small", antonym: "big" },
+            { word: "work", clue: "a job or task to do", sentence: "We finished our math ___.", synonym: "task", antonym: "play" },
+            { word: "know", clue: "to understand or remember", sentence: "I ___ how to spell rain.", synonym: "understand", antonym: "forget" },
+            { word: "place", clue: "a spot or location", sentence: "This is a good ___ to read.", synonym: "spot", antonym: "nowhere" },
+            { word: "years", clue: "more than one year", sentence: "She has lived here for two ___.", synonym: "ages", antonym: "days" },
+            { word: "rain", clue: "water that falls from clouds", sentence: "The ___ made puddles outside.", synonym: "shower", antonym: "sunshine" },
+            { word: "mail", clue: "letters or packages sent to people", sentence: "We checked the ___ after school.", synonym: "letters", antonym: "trash" },
+            { word: "wait", clue: "to stay until something happens", sentence: "Please ___ for your turn.", synonym: "pause", antonym: "rush" },
+            { word: "paint", clue: "colored liquid used to make pictures", sentence: "Ella used blue ___ for the sky.", synonym: "color", antonym: "erase" },
+            { word: "chant", clue: "to say words again and again", sentence: "The class did a spelling ___.", synonym: "repeat", antonym: "whisper" }
+          ])
+        }
+      ],
+      evelyn: [
+        {
+          label: "Grade 3 Week 1",
+          theme: "K12Reader Short A/E and Academic Words",
+          words: buildWordSet([
+            { word: "high", clue: "far above the ground", sentence: "The kite flew ___ in the sky.", synonym: "tall", antonym: "low" },
+            { word: "every", clue: "each one in a group", sentence: "We read ___ word carefully.", synonym: "each", antonym: "none" },
+            { word: "near", clue: "not far away", sentence: "The desk is ___ the window.", synonym: "close", antonym: "far" },
+            { word: "west", clue: "the direction where the sun sets", sentence: "The map shows mountains in the ___.", synonym: "leftward", antonym: "east" },
+            { word: "dress", clue: "clothing worn as one piece", sentence: "The blue ___ had tiny flowers.", synonym: "gown", antonym: "pants" },
+            { word: "best", clue: "better than all the others", sentence: "Evelyn chose her ___ idea.", synonym: "top", antonym: "worst" },
+            { word: "next", clue: "coming right after this one", sentence: "The ___ chapter starts tomorrow.", synonym: "following", antonym: "previous" },
+            { word: "else", clue: "in addition or instead", sentence: "What ___ should we pack?", synonym: "other", antonym: "same" },
+            { word: "checked", clue: "looked at something to make sure", sentence: "She ___ her answer before clicking next.", synonym: "reviewed", antonym: "ignored" },
+            { word: "grand", clue: "large, impressive, or important", sentence: "The museum had a ___ staircase.", synonym: "great", antonym: "plain" }
+          ])
+        },
+        {
+          label: "Grade 3 Week 2",
+          theme: "K12Reader Short I/O/U and Academic Words",
+          words: buildWordSet([
+            { word: "between", clue: "in the space separating two things", sentence: "The book is ___ the lamp and the cup.", synonym: "among", antonym: "outside" },
+            { word: "own", clue: "belonging to yourself", sentence: "Evelyn wrote her ___ ending.", synonym: "personal", antonym: "shared" },
+            { word: "base", clue: "the bottom or main support", sentence: "The statue has a stone ___.", synonym: "foundation", antonym: "top" },
+            { word: "country", clue: "a nation or land with its own government", sentence: "Canada is a ___ north of the United States.", synonym: "nation", antonym: "city" },
+            { word: "plant", clue: "a living thing with roots and leaves", sentence: "The ___ grew toward the light.", synonym: "seedling", antonym: "animal" },
+            { word: "slip", clue: "to slide by accident", sentence: "Be careful not to ___ on the wet floor.", synonym: "slide", antonym: "grip" },
+            { word: "lunch", clue: "a meal eaten in the middle of the day", sentence: "We packed noodles for ___.", synonym: "meal", antonym: "breakfast" },
+            { word: "pond", clue: "a small body of water", sentence: "Frogs croaked near the ___.", synonym: "pool", antonym: "desert" },
+            { word: "front", clue: "the part that faces forward", sentence: "The title is on the ___ cover.", synonym: "face", antonym: "back" },
+            { word: "thump", clue: "a heavy bumping sound", sentence: "We heard a ___ when the book fell.", synonym: "bump", antonym: "silence" }
+          ])
+        },
+        {
+          label: "Grade 4 Week 1",
+          theme: "K12Reader Schwa N and Academic Words",
+          words: buildWordSet([
+            { word: "rolled", clue: "moved by turning over and over", sentence: "The ball ___ down the hill.", synonym: "tumbled", antonym: "stopped" },
+            { word: "finger", clue: "one of the parts at the end of a hand", sentence: "She raised one ___ to answer.", synonym: "digit", antonym: "toe" },
+            { word: "except", clue: "not including", sentence: "Everyone came ___ Ben.", synonym: "besides", antonym: "including" },
+            { word: "speed", clue: "how fast something moves", sentence: "The runner increased her ___.", synonym: "pace", antonym: "slowness" },
+            { word: "eleven", clue: "the number after ten", sentence: "There were ___ pencils in the box.", synonym: "11", antonym: "ten" },
+            { word: "catch", clue: "to grab something moving", sentence: "Can you ___ the ball?", synonym: "grab", antonym: "drop" },
+            { word: "itself", clue: "that very thing alone", sentence: "The door closed by ___.", synonym: "alone", antonym: "another" },
+            { word: "stolen", clue: "taken without permission", sentence: "The ___ bike was returned.", synonym: "taken", antonym: "returned" },
+            { word: "button", clue: "a small fastener on clothing", sentence: "The coat lost one ___.", synonym: "fastener", antonym: "hole" },
+            { word: "bargain", clue: "a good deal or low price", sentence: "The book was a ___ at the sale.", synonym: "deal", antonym: "overcharge" }
+          ])
+        },
+        {
+          label: "Grade 4 Week 2",
+          theme: "K12Reader Schwa N and Academic Words",
+          words: buildWordSet([
+            { word: "yourself", clue: "you, not someone else", sentence: "Try solving it by ___.", synonym: "alone", antonym: "others" },
+            { word: "maybe", clue: "possibly but not surely", sentence: "___ we can visit the library.", synonym: "perhaps", antonym: "certainly" },
+            { word: "veteran", clue: "a person with long experience or military service", sentence: "The ___ spoke at school.", synonym: "expert", antonym: "beginner" },
+            { word: "complete", clue: "having all parts finished", sentence: "Her paragraph was ___.", synonym: "finished", antonym: "incomplete" },
+            { word: "rather", clue: "somewhat or instead", sentence: "The puzzle was ___ tricky.", synonym: "quite", antonym: "barely" },
+            { word: "crowd", clue: "a large group of people", sentence: "A ___ waited near the stage.", synonym: "group", antonym: "individual" },
+            { word: "since", clue: "from a time in the past until now", sentence: "She has practiced ___ Monday.", synonym: "after", antonym: "before" },
+            { word: "fresh", clue: "new, clean, or recently made", sentence: "The bakery smelled like ___ bread.", synonym: "new", antonym: "stale" },
+            { word: "piece", clue: "one part of something", sentence: "May I have a ___ of paper?", synonym: "part", antonym: "whole" },
+            { word: "cotton", clue: "soft fiber used to make cloth", sentence: "The shirt was made of ___.", synonym: "fiber", antonym: "metal" }
+          ])
+        }
+      ]
+    };
+
     const profiles = {
       evelyn: {
         name: "Evelyn Gu",
@@ -1489,18 +1631,7 @@
         parentPrompt: "Ask Evelyn to explain why the chosen word fits the sentence.",
         writingBoost: "Write a new sentence with the same vocabulary word.",
         bonusPrompt: "Name a synonym or antonym.",
-        words: [
-          { word: "curious", clue: "wanting to learn or know more", sentence: "Maya was ___ about how the magnet pulled the paper clip.", choices: ["curious", "careless", "sleepy", "ordinary"], synonym: "interested", antonym: "uninterested" },
-          { word: "predict", clue: "to say what may happen next", sentence: "Before reading the ending, Leo tried to ___ what would happen.", choices: ["predict", "decorate", "borrow", "scatter"], synonym: "guess", antonym: "ignore" },
-          { word: "brave", clue: "showing courage", sentence: "The ___ student spoke kindly when others were silent.", choices: ["brave", "shallow", "tiny", "bitter"], synonym: "courageous", antonym: "fearful" },
-          { word: "ancient", clue: "very old", sentence: "The museum displayed an ___ clay bowl.", choices: ["ancient", "fresh", "modern", "noisy"], synonym: "old", antonym: "new" },
-          { word: "gather", clue: "to bring together", sentence: "Please ___ the art supplies before class starts.", choices: ["gather", "divide", "melt", "whisper"], synonym: "collect", antonym: "scatter" },
-          { word: "fragile", clue: "easy to break", sentence: "The glass ornament was ___, so Ella held it carefully.", choices: ["fragile", "solid", "wild", "hungry"], synonym: "delicate", antonym: "strong" },
-          { word: "rapid", clue: "very fast", sentence: "The river made a ___ turn after the rain.", choices: ["rapid", "gentle", "silent", "empty"], synonym: "quick", antonym: "slow" },
-          { word: "compare", clue: "to tell how things are alike and different", sentence: "We can ___ two stories by looking at their characters.", choices: ["compare", "erase", "float", "invite"], synonym: "contrast", antonym: "separate" },
-          { word: "prepare", clue: "to get ready", sentence: "Dad helped us ___ snacks for the trip.", choices: ["prepare", "forget", "spill", "avoid"], synonym: "ready", antonym: "neglect" },
-          { word: "notice", clue: "to see or become aware of something", sentence: "Did you ___ the small footprint near the garden?", choices: ["notice", "cover", "repair", "argue"], synonym: "observe", antonym: "miss" }
-        ]
+        words: k12Sets.evelyn[0].words
       },
       ella: {
         name: "Ella Gu",
@@ -1511,18 +1642,7 @@
         parentPrompt: "Ask Ella to say the word aloud and clap the syllables.",
         writingBoost: "Draw a quick picture and label it with the word.",
         bonusPrompt: "Use the word in a silly sentence.",
-        words: [
-          { word: "bright", clue: "full of light", sentence: "The ___ sun came up over the hill.", choices: ["bright", "cold", "sad", "tiny"], synonym: "shiny", antonym: "dim" },
-          { word: "kind", clue: "nice and helpful", sentence: "A ___ friend shares the crayons.", choices: ["kind", "loud", "wet", "slow"], synonym: "nice", antonym: "mean" },
-          { word: "tiny", clue: "very small", sentence: "A ___ seed can grow into a tall flower.", choices: ["tiny", "huge", "late", "round"], synonym: "small", antonym: "huge" },
-          { word: "jump", clue: "to push off the ground", sentence: "The frog can ___ across the pond.", choices: ["jump", "read", "paint", "sleep"], synonym: "hop", antonym: "sit" },
-          { word: "soft", clue: "easy to press or touch", sentence: "The blanket felt ___ and warm.", choices: ["soft", "sharp", "dark", "fast"], synonym: "smooth", antonym: "hard" },
-          { word: "happy", clue: "feeling good", sentence: "Ella felt ___ when she saw her new book.", choices: ["happy", "angry", "lost", "empty"], synonym: "glad", antonym: "sad" },
-          { word: "near", clue: "not far away", sentence: "The puppy sat ___ the door.", choices: ["near", "under", "loud", "brown"], synonym: "close", antonym: "far" },
-          { word: "quick", clue: "fast", sentence: "The ___ rabbit ran into the grass.", choices: ["quick", "deep", "red", "sleepy"], synonym: "fast", antonym: "slow" },
-          { word: "brave", clue: "not afraid to try", sentence: "The ___ girl tried the tall slide.", choices: ["brave", "messy", "blue", "quiet"], synonym: "bold", antonym: "scared" },
-          { word: "clean", clue: "not dirty", sentence: "We washed the cup until it was ___.", choices: ["clean", "sour", "late", "round"], synonym: "neat", antonym: "dirty" }
-        ]
+        words: k12Sets.ella[0].words
       },
       nianwen: {
         name: "Nianwen",
@@ -1825,6 +1945,9 @@
       meaning: ["meaning", "meaning-match", "meaningMatch", "match"],
       sentence: ["sentence", "sentence-builder", "sentenceBuilder", "builder"]
     };
+
+    weeklySets.ella = k12Sets.ella;
+    weeklySets.evelyn = k12Sets.evelyn;
 
     const decorationCatalog = [
       { id: "starter", name: "Starter Desk", cost: 0, color: "#2563eb", soft: "#e0f2fe", icon: "S" },
