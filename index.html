@@ -1490,6 +1490,25 @@
       });
     }
 
+    function makeK12Entry(word, theme) {
+      const cleanTheme = theme.toLowerCase();
+      return {
+        word,
+        clue: `a ${cleanTheme} spelling word`,
+        sentence: `This week's ${cleanTheme} word is ___.`,
+        synonym: "practice word",
+        antonym: "different word"
+      };
+    }
+
+    function makeK12Week(label, theme, words) {
+      return {
+        label,
+        theme: `K12Reader ${theme}`,
+        words: buildWordSet(words.map((word) => makeK12Entry(word, theme)))
+      };
+    }
+
     const k12Sets = {
       ella: [
         {
@@ -1620,6 +1639,66 @@
         }
       ]
     };
+
+    const k12ExtraWeeks = {
+      grade1: [
+        makeK12Week("Grade 1 Week 3", "Short I Word Families", ["it", "sit", "hit", "bit", "fit", "pin", "win", "fin", "bin", "tin"]),
+        makeK12Week("Grade 1 Week 4", "Short O Word Families", ["on", "not", "hot", "pot", "top", "hop", "mop", "dog", "log", "fog"]),
+        makeK12Week("Grade 1 Week 5", "Short U Word Families", ["up", "cup", "pup", "sun", "run", "fun", "bug", "rug", "hug", "mud"]),
+        makeK12Week("Grade 1 Week 6", "Long A and Silent E", ["make", "take", "cake", "game", "name", "same", "late", "gate", "plate", "bake"]),
+        makeK12Week("Grade 1 Week 7", "Long I and Silent E", ["like", "bike", "hike", "time", "line", "mine", "five", "hide", "ride", "kite"]),
+        makeK12Week("Grade 1 Week 8", "Long O and Silent E", ["home", "hope", "rope", "note", "stone", "cone", "bone", "rose", "hose", "joke"]),
+        makeK12Week("Grade 1 Week 9", "Consonant Blends", ["blue", "black", "flag", "frog", "spin", "stop", "clap", "drum", "trip", "grass"]),
+        makeK12Week("Grade 1 Week 10", "Digraphs", ["ship", "shop", "fish", "dish", "this", "that", "thin", "path", "chip", "much"])
+      ],
+      grade2: [
+        makeK12Week("Grade 2 Week 3", "Long E Patterns", ["green", "three", "sleep", "keep", "feet", "team", "dream", "clean", "read", "seat"]),
+        makeK12Week("Grade 2 Week 4", "Long O Patterns", ["boat", "coat", "road", "soap", "goat", "snow", "grow", "show", "slow", "window"]),
+        makeK12Week("Grade 2 Week 5", "Long I Patterns", ["light", "night", "right", "bright", "high", "sigh", "pie", "tie", "fly", "sky"]),
+        makeK12Week("Grade 2 Week 6", "R-Controlled ER IR UR", ["her", "fern", "term", "bird", "girl", "first", "shirt", "turn", "hurt", "curl"]),
+        makeK12Week("Grade 2 Week 7", "OO and EW Patterns", ["moon", "soon", "food", "room", "spoon", "book", "look", "cook", "new", "flew"]),
+        makeK12Week("Grade 2 Week 8", "OU and OW Patterns", ["out", "shout", "cloud", "round", "sound", "cow", "how", "now", "brown", "flower"]),
+        makeK12Week("Grade 2 Week 9", "Compound Words", ["bedroom", "sunset", "inside", "outside", "playground", "raincoat", "baseball", "cupcake", "mailbox", "football"]),
+        makeK12Week("Grade 2 Week 10", "Suffixes", ["jumped", "helped", "looked", "playing", "walking", "helper", "teacher", "kindly", "careful", "hopeful"])
+      ],
+      grade3: [
+        makeK12Week("Grade 3 Week 3", "Long Vowel Review", ["float", "dream", "speech", "bright", "throat", "coach", "remain", "season", "between", "approach"]),
+        makeK12Week("Grade 3 Week 4", "R-Controlled Vowels", ["sharp", "artist", "march", "storm", "porch", "north", "serve", "person", "circle", "purple"]),
+        makeK12Week("Grade 3 Week 5", "Diphthongs", ["amount", "around", "ground", "found", "south", "voice", "choice", "noise", "point", "join"]),
+        makeK12Week("Grade 3 Week 6", "Prefixes", ["unhappy", "replay", "preheat", "disagree", "rewrite", "unlock", "preview", "misread", "return", "unfair"]),
+        makeK12Week("Grade 3 Week 7", "Suffix ED ING ER", ["planned", "dropped", "slipped", "running", "swimming", "writer", "farmer", "teacher", "bigger", "smaller"]),
+        makeK12Week("Grade 3 Week 8", "Plural Endings", ["boxes", "dishes", "wishes", "babies", "puppies", "cities", "leaves", "knives", "wolves", "halves"]),
+        makeK12Week("Grade 3 Week 9", "Contractions", ["can't", "won't", "don't", "isn't", "aren't", "I'm", "you're", "we're", "they're", "that's"]),
+        makeK12Week("Grade 3 Week 10", "Homophones", ["there", "their", "they're", "to", "too", "two", "right", "write", "hear", "here"])
+      ],
+      grade4: [
+        makeK12Week("Grade 4 Week 3", "Long Vowel Teams", ["explain", "remain", "complain", "repeat", "increase", "receive", "believe", "neighbor", "freight", "weight"]),
+        makeK12Week("Grade 4 Week 4", "R-Controlled and Schwa", ["calendar", "grammar", "regular", "popular", "dollar", "visitor", "doctor", "actor", "mirror", "error"]),
+        makeK12Week("Grade 4 Week 5", "Prefixes and Roots", ["preview", "prepare", "disconnect", "misplace", "subway", "transfer", "portable", "support", "transport", "inspect"]),
+        makeK12Week("Grade 4 Week 6", "Suffixes", ["hopeful", "careless", "quickly", "movement", "payment", "kindness", "darkness", "creative", "active", "famous"]),
+        makeK12Week("Grade 4 Week 7", "Multisyllable Words", ["important", "different", "favorite", "possible", "remember", "animal", "library", "history", "million", "company"]),
+        makeK12Week("Grade 4 Week 8", "Consonant Changes", ["medicine", "decimal", "certain", "center", "cycle", "city", "gentle", "giant", "engine", "danger"]),
+        makeK12Week("Grade 4 Week 9", "Greek and Latin Roots", ["telephone", "photograph", "autograph", "biology", "geology", "export", "import", "predict", "dictate", "inspect"]),
+        makeK12Week("Grade 4 Week 10", "Challenge Words", ["knowledge", "question", "although", "thoughtful", "neighbor", "straight", "throughout", "beautiful", "experience", "favorite"])
+      ]
+    };
+
+    k12Sets.ella = [
+      k12Sets.ella[0],
+      k12Sets.ella[1],
+      ...k12ExtraWeeks.grade1,
+      k12Sets.ella[2],
+      k12Sets.ella[3],
+      ...k12ExtraWeeks.grade2
+    ];
+    k12Sets.evelyn = [
+      k12Sets.evelyn[0],
+      k12Sets.evelyn[1],
+      ...k12ExtraWeeks.grade3,
+      k12Sets.evelyn[2],
+      k12Sets.evelyn[3],
+      ...k12ExtraWeeks.grade4
+    ];
 
     const profiles = {
       evelyn: {
