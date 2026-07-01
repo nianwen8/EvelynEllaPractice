@@ -1639,6 +1639,74 @@
       also: "Maya packed water and ___ brought a snack."
     };
 
+    const localWordMeanings = {
+      the: "used before a noun to point to one specific person, place, or thing",
+      of: "belonging to or connected with something",
+      and: "used to join words, names, or ideas",
+      that: "used to point to a specific person, place, thing, or idea",
+      to: "toward a place, person, or goal",
+      in: "inside or within something",
+      is: "a present-tense form of be",
+      you: "the person or people being spoken to",
+      than: "used when comparing two things",
+      it: "the thing, animal, or idea already mentioned",
+      he: "a boy or man already mentioned",
+      was: "a past-tense form of be",
+      for: "intended to help, belong to, or be used by someone",
+      on: "touching or supported by the surface of something",
+      are: "a present-tense form of be for more than one thing or person",
+      as: "used to compare or show a role, time, or way",
+      with: "together with or using something",
+      his: "belonging to a boy or man",
+      they: "the people, animals, or things already mentioned",
+      at: "in, on, or near a particular place or time",
+      be: "to exist, happen, or have a quality",
+      this: "used to point to someone or something nearby",
+      have: "to own, hold, or experience something",
+      from: "starting at a place, person, or time",
+      or: "used to show a choice between things",
+      one: "the number 1 or a single thing",
+      had: "owned, held, or experienced in the past",
+      by: "near, beside, or done through someone or something",
+      but: "used to show a contrast or exception",
+      not: "used to make a word or sentence negative",
+      what: "asking for information about something",
+      all: "the whole amount or every person or thing",
+      were: "a past-tense form of be for more than one thing or person",
+      we: "the speaker and at least one other person",
+      when: "at what time or the time that something happens",
+      your: "belonging to the person being spoken to",
+      said: "spoke or told something",
+      over: "above, across, or on the other side of something",
+      new: "recently made, found, or not used before",
+      art: "creative work such as drawing, painting, or sculpture",
+      take: "to carry, move, or bring something with you",
+      only: "just one or no more than",
+      little: "small in size, amount, or age",
+      work: "a job, task, or effort to make or finish something",
+      know: "to understand, remember, or be sure of something",
+      place: "a particular spot or location",
+      years: "more than one period of twelve months",
+      live: "to be alive or to make your home somewhere",
+      give: "to hand something to someone",
+      most: "the greatest amount or number",
+      very: "to a high degree",
+      after: "later than something else",
+      just: "exactly, only, or a very short time ago",
+      soon: "after a short time",
+      old: "having lived or existed for a long time",
+      same: "not different; exactly alike",
+      any: "one, some, or even the smallest amount",
+      boy: "a male child",
+      came: "moved toward or arrived at a place",
+      want: "to wish for or need something",
+      also: "in addition; too"
+    };
+
+    function meaningClue(word, fallback = "") {
+      return localWordMeanings[dictionaryKey(word)] || fallback || `the meaning of "${word}"`;
+    }
+
     function sceneSentence(word, partOfSpeech = "") {
       const local = localSceneSentences[dictionaryKey(word)];
       if (local) return local;
@@ -1717,7 +1785,7 @@
     function makeK12Entry(word, grade, week, theme, position) {
       return {
         word,
-        clue: `K12Reader Grade ${grade} Week ${week}, word ${position + 1}: ${theme}`,
+        clue: meaningClue(word),
         sentence: sceneSentence(word),
         synonym: "practice word",
         antonym: "different word"
@@ -2079,7 +2147,7 @@
       session: "vocabPracticeSessionReset20260525",
       decorations: "vocabPracticeDecorations20260614",
       arcade: "vocabPracticeArcadeSpending20260615",
-      dictionary: "vocabPracticeDictionaryHints20260630SceneSentencesV3"
+      dictionary: "vocabPracticeDictionaryHints20260630MeaningCluesV1"
     };
 
     function defaultWeekIndex() {
@@ -2377,7 +2445,7 @@
 
     function fallbackHint(item) {
       return {
-        clue: `a K12Reader spelling word from ${currentWeek().label}`,
+        clue: meaningClue(item.word),
         sentence: sceneSentence(item.word),
         synonym: item.synonym || "practice word",
         antonym: item.antonym || "different word",
