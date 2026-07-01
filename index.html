@@ -1374,7 +1374,7 @@
         </svg>
         <div>
           <h1>Vocabulary Fun Practice</h1>
-          <p class="subtitle">Word completion, word choice, and spelling practice for Evelyn, Ella, Nianwen, and Teng.</p>
+          <p class="subtitle">Word completion, word choice, and spelling practice for Evelyn and Ella.</p>
         </div>
       </div>
       <div class="score-strip" aria-label="Practice score">
@@ -2126,6 +2126,12 @@
     weeklySets.ella = k12Sets.ella;
     weeklySets.evelyn = k12Sets.evelyn;
 
+    const activeProfileKeys = ["evelyn", "ella"];
+
+    function normalizeProfile(profileKey) {
+      return activeProfileKeys.includes(profileKey) ? profileKey : "evelyn";
+    }
+
     const decorationCatalog = [
       { id: "starter", name: "Starter Desk", cost: 0, color: "#2563eb", soft: "#e0f2fe", icon: "S" },
       { id: "rainbow", name: "Rainbow Lights", cost: 25, color: "#be123c", soft: "#ffe4e6", icon: "R" },
@@ -2160,7 +2166,7 @@
     const savedSession = loadSession();
 
     const state = {
-      profile: savedSession.profile || "evelyn",
+      profile: normalizeProfile(savedSession.profile || "evelyn"),
       mode: canonicalMode(savedSession.mode || "choice"),
       week: Number.isInteger(savedSession.week) ? savedSession.week : defaultWeekIndex(),
       index: 0,
@@ -2271,13 +2277,13 @@
     function loadDecorations() {
       try {
         const saved = JSON.parse(localStorage.getItem(storageKeys.decorations)) || {};
-        const base = Object.fromEntries(Object.keys(profiles).map((key) => [
+        const base = Object.fromEntries(activeProfileKeys.map((key) => [
           key,
           { owned: ["starter"], equipped: "starter" }
         ]));
         return { ...base, ...saved };
       } catch {
-        return Object.fromEntries(Object.keys(profiles).map((key) => [
+        return Object.fromEntries(activeProfileKeys.map((key) => [
           key,
           { owned: ["starter"], equipped: "starter" }
         ]));
@@ -2291,10 +2297,10 @@
     function loadArcadeSpending() {
       try {
         const saved = JSON.parse(localStorage.getItem(storageKeys.arcade)) || {};
-        const base = Object.fromEntries(Object.keys(profiles).map((key) => [key, 0]));
+        const base = Object.fromEntries(activeProfileKeys.map((key) => [key, 0]));
         return { ...base, ...saved };
       } catch {
-        return Object.fromEntries(Object.keys(profiles).map((key) => [key, 0]));
+        return Object.fromEntries(activeProfileKeys.map((key) => [key, 0]));
       }
     }
 
@@ -2675,9 +2681,9 @@
     }
 
     function familyBoardRows(progressOverride = null) {
-      const totals = Object.fromEntries(Object.entries(profiles).map(([key, profile]) => [
+      const totals = Object.fromEntries(activeProfileKeys.map((key) => [
         key,
-        { key, name: profile.short, badges: 0, stars: 0, attempts: 0, correct: 0 }
+        { key, name: profiles[key].short, badges: 0, stars: 0, attempts: 0, correct: 0 }
       ]));
 
       const progressRows = progressOverride ? Object.values(progressOverride) : Object.values(loadAllLocalProgress());
@@ -3027,12 +3033,15 @@
     }
 
     function buildControls() {
-      el.profiles.innerHTML = Object.entries(profiles).map(([key, profile]) => `
+      el.profiles.innerHTML = activeProfileKeys.map((key) => {
+        const profile = profiles[key];
+        return `
         <button class="select-btn" type="button" data-profile="${key}" aria-pressed="${key === state.profile}">
           <span class="avatar ${profile.colorClass}">${profile.initials}</span>
           <span><strong>${profile.short}</strong><small>${profile.grade}</small></span>
         </button>
-      `).join("");
+      `;
+      }).join("");
 
       el.modes.innerHTML = Object.entries(modes).map(([key, mode]) => `
         <button class="select-btn" type="button" data-mode="${key}" aria-pressed="${key === state.mode}">
