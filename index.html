@@ -1575,11 +1575,150 @@
       ]
     };
 
+    const localSceneSentences = {
+      the: "Maya put ___ red book on her desk before class.",
+      of: "The handle ___ the backpack broke on the bus.",
+      and: "Ella packed markers ___ paper for the art project.",
+      that: "Dad pointed to ___ star in the evening sky.",
+      to: "The class walked ___ the library after lunch.",
+      in: "The pencil was ___ the blue cup by the window.",
+      is: "The sky ___ bright after the rain stopped.",
+      you: "Can ___ help me carry the books to the shelf?",
+      than: "This tower is taller ___ the one we built yesterday.",
+      it: "The puppy chased the ball, then brought ___ back.",
+      he: "When Leo heard his name, ___ raised his hand.",
+      was: "The playground ___ quiet after the bell rang.",
+      for: "Ella saved a seat ___ her friend at lunch.",
+      on: "The note was ___ the kitchen table.",
+      are: "The crayons ___ inside the yellow box.",
+      as: "Maya was quiet ___ a mouse during story time.",
+      with: "Evelyn drew a flower ___ a purple marker.",
+      his: "Ben zipped ___ jacket before going outside.",
+      they: "After recess, ___ lined up by the door.",
+      at: "We met ___ the front gate before school.",
+      be: "Please ___ kind when someone makes a mistake.",
+      this: "I want to read ___ page one more time.",
+      have: "The students ___ new notebooks for spelling.",
+      from: "A postcard came ___ Grandma in the mail.",
+      or: "Would you like milk ___ water with lunch?",
+      one: "Only ___ pencil was left in the cup.",
+      had: "The team ___ a plan before the game started.",
+      by: "The backpack sat ___ the classroom door.",
+      but: "The puzzle was hard, ___ Ella kept trying.",
+      not: "Please do ___ run in the hallway.",
+      what: "___ did you find under the desk?",
+      all: "The teacher asked ___ students to bring their books.",
+      were: "The shoes ___ muddy after soccer practice.",
+      we: "After dinner, ___ read a chapter together.",
+      when: "Call me ___ you finish the last problem.",
+      your: "Please write ___ name at the top of the paper.",
+      said: "The coach ___ the game would start soon.",
+      over: "The bird flew ___ the fence into the garden.",
+      new: "Ella opened her ___ notebook on the first day.",
+      art: "The class hung colorful ___ on the wall.",
+      take: "Please ___ your lunchbox to the kitchen.",
+      only: "There was ___ one cookie left on the plate.",
+      little: "A ___ bird hopped near the window.",
+      work: "Maya finished her math ___ before recess.",
+      know: "I ___ the answer because I practiced yesterday.",
+      place: "This quiet corner is a good ___ to read.",
+      years: "Evelyn kept her favorite book for many ___.",
+      live: "The frogs ___ near the pond in spring.",
+      give: "Please ___ the note to your teacher.",
+      most: "The tallest sunflower got the ___ sunlight.",
+      very: "The soup was ___ warm after lunch.",
+      after: "We played outside ___ the rain stopped.",
+      just: "Ella had ___ enough time to finish.",
+      soon: "The bus will arrive ___ after the bell.",
+      old: "The ___ map showed where the trail began.",
+      same: "Both twins chose the ___ blue backpack.",
+      any: "Do we have ___ tape for the poster?",
+      boy: "The ___ waved from the school bus.",
+      came: "Grandma ___ to the concert after dinner.",
+      want: "I ___ to read one more page tonight.",
+      also: "Maya packed water and ___ brought a snack."
+    };
+
+    function sceneSentence(word, partOfSpeech = "") {
+      const local = localSceneSentences[dictionaryKey(word)];
+      if (local) return local;
+      const lowerPart = String(partOfSpeech || "").toLowerCase();
+      if (lowerPart.includes("verb")) {
+        return "During class, the students will ___ before they share their work.";
+      }
+      if (lowerPart.includes("adjective")) {
+        return "On the story page, the ___ character helped solve the problem.";
+      }
+      if (lowerPart.includes("adverb")) {
+        return "At breakfast, Maya packed her lunch and ___ checked her backpack.";
+      }
+      if (lowerPart.includes("preposition")) {
+        return "The library book was ___ the blue folder on the desk.";
+      }
+      if (lowerPart.includes("conjunction")) {
+        return "Ella brought crayons ___ paper for the art project.";
+      }
+      if (lowerPart.includes("pronoun")) {
+        return "When the teacher called the group, ___ walked to the reading rug.";
+      }
+      if (lowerPart.includes("determiner") || lowerPart.includes("article")) {
+        return "At the table, Dad picked up ___ small notebook.";
+      }
+      return "In spelling practice, the teacher wrote ___ on the board for everyone to read.";
+    }
+
+    const preferredPartsOfSpeech = {
+      a: "determiner",
+      an: "determiner",
+      the: "determiner",
+      that: "determiner",
+      this: "determiner",
+      any: "determiner",
+      of: "preposition",
+      to: "preposition",
+      in: "preposition",
+      on: "preposition",
+      over: "preposition",
+      across: "preposition",
+      during: "preposition",
+      toward: "preposition",
+      between: "preposition",
+      since: "preposition",
+      against: "preposition",
+      with: "preposition",
+      from: "preposition",
+      by: "preposition",
+      and: "conjunction",
+      but: "conjunction",
+      than: "conjunction",
+      or: "conjunction",
+      he: "pronoun",
+      you: "pronoun",
+      they: "pronoun",
+      we: "pronoun",
+      your: "pronoun",
+      our: "pronoun",
+      yourself: "pronoun",
+      itself: "pronoun",
+      anyone: "pronoun",
+      me: "pronoun",
+      also: "adverb",
+      only: "adverb",
+      usually: "adverb",
+      maybe: "adverb",
+      rather: "adverb",
+      soon: "adverb",
+      often: "adverb",
+      slowly: "adverb",
+      very: "adverb",
+      too: "adverb"
+    };
+
     function makeK12Entry(word, grade, week, theme, position) {
       return {
         word,
         clue: `K12Reader Grade ${grade} Week ${week}, word ${position + 1}: ${theme}`,
-        sentence: `Practice the K12Reader spelling word: ___.`,
+        sentence: sceneSentence(word),
         synonym: "practice word",
         antonym: "different word"
       };
@@ -1940,7 +2079,7 @@
       session: "vocabPracticeSessionReset20260525",
       decorations: "vocabPracticeDecorations20260614",
       arcade: "vocabPracticeArcadeSpending20260615",
-      dictionary: "vocabPracticeDictionaryHints20260629"
+      dictionary: "vocabPracticeDictionaryHints20260630SceneSentencesV3"
     };
 
     function defaultWeekIndex() {
@@ -2163,12 +2302,6 @@
       return "";
     }
 
-    function sentenceFromDefinition(definition) {
-      const text = String(definition || "a word to practice").replace(/\.$/, "");
-      const lower = text.charAt(0).toLowerCase() + text.slice(1);
-      return `The word ___ means ${lower}.`;
-    }
-
     function lookupCandidates(word) {
       const lower = dictionaryKey(word);
       const candidates = [lower];
@@ -2181,25 +2314,51 @@
       return [...new Set(candidates.filter(Boolean))];
     }
 
+    function preferredPartForWord(word) {
+      return preferredPartsOfSpeech[dictionaryKey(word)] || "";
+    }
+
+    function definitionScore(candidate, word) {
+      let score = 0;
+      const preferred = preferredPartForWord(word);
+      const part = String(candidate.partOfSpeech || "").toLowerCase();
+      if (preferred && part.includes(preferred)) score += 100;
+      if (candidate.exampleSentence) score += 45;
+      if (candidate.definition.length <= 140) score += 12;
+      if (part.includes("noun") && preferred && preferred !== "noun") score -= 35;
+      return score;
+    }
+
     function extractDictionaryHint(entries, word) {
       const entryList = Array.isArray(entries) ? entries : [];
+      const candidates = [];
       for (const entry of entryList) {
         for (const meaning of entry.meanings || []) {
           for (const definition of meaning.definitions || []) {
             if (!definition.definition) continue;
             const synonyms = [...(definition.synonyms || []), ...(meaning.synonyms || [])].filter(Boolean);
             const antonyms = [...(definition.antonyms || []), ...(meaning.antonyms || [])].filter(Boolean);
-            return {
+            const candidate = {
               clue: definition.definition,
-              sentence: blankExample(definition.example, word) || sentenceFromDefinition(definition.definition),
+              exampleSentence: blankExample(definition.example, word),
+              partOfSpeech: meaning.partOfSpeech,
               synonym: synonyms[0] || "related word",
               antonym: antonyms[0] || "opposite word",
               hintSource: "dictionaryapi.dev"
             };
+            candidates.push(candidate);
           }
         }
       }
-      return null;
+      const best = candidates.sort((a, b) => definitionScore(b, word) - definitionScore(a, word))[0];
+      if (!best) return null;
+      return {
+        clue: best.clue,
+        sentence: best.exampleSentence || sceneSentence(word, best.partOfSpeech),
+        synonym: best.synonym,
+        antonym: best.antonym,
+        hintSource: best.hintSource
+      };
     }
 
     async function fetchDictionaryHint(word) {
@@ -2219,7 +2378,7 @@
     function fallbackHint(item) {
       return {
         clue: `a K12Reader spelling word from ${currentWeek().label}`,
-        sentence: "Use the spelling list to choose the word ___.",
+        sentence: sceneSentence(item.word),
         synonym: item.synonym || "practice word",
         antonym: item.antonym || "different word",
         hintSource: "K12Reader weekly list"
