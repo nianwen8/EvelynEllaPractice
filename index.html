@@ -225,6 +225,40 @@
       line-height: 1.25;
     }
 
+    .week-picker {
+      display: grid;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid #dbeafe;
+      border-radius: 8px;
+      background: #f7f9fc;
+    }
+
+    .week-picker label {
+      color: var(--muted);
+      font-size: .74rem;
+      font-weight: 850;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .week-picker select {
+      width: 100%;
+      min-height: 46px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: #fff;
+      font: inherit;
+      font-weight: 800;
+    }
+
+    .week-picker small {
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
     .word-bank {
       margin-top: 16px;
       padding: 12px;
@@ -1340,7 +1374,7 @@
         </svg>
         <div>
           <h1>Vocabulary Fun Practice</h1>
-          <p class="subtitle">Word completion, word choice, spelling, and meaning match for Evelyn, Ella, Nianwen, and Teng.</p>
+          <p class="subtitle">Word completion, word choice, and spelling practice for Evelyn, Ella, Nianwen, and Teng.</p>
         </div>
       </div>
       <div class="score-strip" aria-label="Practice score">
@@ -1875,18 +1909,11 @@
         label: "Word Completion",
         summary: "Use the letters to build the vocabulary word.",
         icon: "complete"
-      },
-      meaning: {
-        title: "Match word to meaning.",
-        label: "Meaning Match",
-        summary: "Read the word, then pick its meaning.",
-        icon: "meaning"
       }
     };
 
     const modeAliases = {
-      completion: ["completion", "complete", "word-completion", "wordCompletion"],
-      meaning: ["meaning", "meaning-match", "meaningMatch", "match"]
+      completion: ["completion", "complete", "word-completion", "wordCompletion"]
     };
 
     weeklySets.ella = k12Sets.ella;
@@ -1904,8 +1931,7 @@
 
     const icons = {
       choice: '<svg class="mode-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="m15 17 2 2 4-5" stroke="#4d7c0f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-      complete: '<svg class="mode-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="2"/><rect x="10" y="5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="2"/><rect x="17" y="5" width="4" height="5" rx="1" stroke="currentColor" stroke-width="2"/><path d="M4 17h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
-      meaning: '<svg class="mode-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 5h9a4 4 0 0 1 0 8H5z" stroke="currentColor" stroke-width="2"/><path d="M5 13h11a3 3 0 0 1 0 6H5z" stroke="#b45309" stroke-width="2"/></svg>'
+      complete: '<svg class="mode-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="2"/><rect x="10" y="5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="2"/><rect x="17" y="5" width="4" height="5" rx="1" stroke="currentColor" stroke-width="2"/><path d="M4 17h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>'
     };
 
     const storageKeys = {
@@ -2239,6 +2265,31 @@
 
     function currentWeekKey() {
       return `${state.profile}-${currentWeek().label.toLowerCase().replaceAll(" ", "-")}`;
+    }
+
+    function weekGroupLabel(week) {
+      const match = String(week.label || "").match(/^Grade\s+\d+/);
+      return match ? match[0] : currentProfile().grade;
+    }
+
+    function weekDropdownOptions() {
+      const groups = [];
+      weeklySets[state.profile].forEach((week, index) => {
+        const groupLabel = weekGroupLabel(week);
+        let group = groups.find((item) => item.label === groupLabel);
+        if (!group) {
+          group = { label: groupLabel, weeks: [] };
+          groups.push(group);
+        }
+        group.weeks.push({ week, index });
+      });
+      return groups.map((group) => `
+        <optgroup label="${escapeAttr(group.label)}">
+          ${group.weeks.map(({ week, index }) => `
+            <option value="${index}" ${index === state.week ? "selected" : ""}>${escapeHTML(week.label)} - ${escapeHTML(week.theme)}</option>
+          `).join("")}
+        </optgroup>
+      `).join("");
     }
 
     function canonicalMode(mode) {
@@ -2687,9 +2738,10 @@
       [...el.modes.children].forEach((button) => {
         button.setAttribute("aria-pressed", button.dataset.mode === state.mode);
       });
-      [...el.weeks.children].forEach((button) => {
-        button.setAttribute("aria-pressed", Number(button.dataset.week) === state.week);
-      });
+      const weekSelect = el.weeks.querySelector("#weekSelect");
+      if (weekSelect) weekSelect.value = String(state.week);
+      const weekSummary = el.weeks.querySelector("#weekSummary");
+      if (weekSummary) weekSummary.textContent = `${currentWeek().label} · ${currentWeek().theme}`;
     }
 
     function choiceButton(text) {
@@ -2711,27 +2763,6 @@
       `;
     }
 
-    function renderMeaning() {
-      const item = currentWord();
-      const decoys = currentWords()
-        .filter((word) => word.word !== item.word)
-        .slice(0, 3)
-        .map((word) => word.clue);
-      const options = shuffle([item.clue, ...decoys]);
-      el.questionPanel.innerHTML = `
-        <span class="mission-tag">Match The Meaning</span>
-        <div class="arena-status"><span>Combo x${state.combo}</span><span>${state.checked ? "Locked" : "Ready"}</span></div>
-        <p class="question">What does <strong>${escapeHTML(item.word)}</strong> mean?</p>
-        <p class="hint">Read each choice carefully.</p>
-        <div class="choices">${options.map((text) => {
-          const selectedClass = state.checked && text === item.clue ? " correct" : "";
-          const wrongClass = state.checked && state.selected === text && text !== item.clue ? " wrong" : "";
-          const activeClass = !state.checked && state.selected === text ? " selected" : "";
-          return `<button class="choice${selectedClass}${wrongClass}${activeClass}" type="button" data-token="?" data-choice="${escapeAttr(text)}">${escapeHTML(text)}</button>`;
-        }).join("")}</div>
-      `;
-    }
-
     function renderCompletion() {
       const item = currentWord();
       const letters = shuffle(item.word.split(""));
@@ -2750,7 +2781,6 @@
 
     function renderCurrentMode() {
       if (state.mode === "choice") renderChoice();
-      if (state.mode === "meaning") renderMeaning();
       if (state.mode === "completion") renderCompletion();
     }
 
@@ -2784,12 +2814,13 @@
         </button>
       `).join("");
 
-      el.weeks.innerHTML = weeklySets[state.profile].map((week, index) => `
-        <button class="select-btn" type="button" data-week="${index}" aria-pressed="${index === state.week}">
-          <span class="avatar ${currentProfile().colorClass}">${index + 1}</span>
-          <span><strong>${week.label}</strong><small>${week.theme}</small></span>
-        </button>
-      `).join("");
+      el.weeks.innerHTML = `
+        <div class="week-picker">
+          <label for="weekSelect">Weekly Set</label>
+          <select id="weekSelect" name="weekSelect">${weekDropdownOptions()}</select>
+          <small id="weekSummary">${escapeHTML(currentWeek().label)} · ${escapeHTML(currentWeek().theme)}</small>
+        </div>
+      `;
     }
 
     function setFeedback(ok, item) {
@@ -2859,7 +2890,7 @@
         clue: item.clue,
         prompt: item.sentence,
         answer: answerValue(item, ok),
-        expected: state.mode === "meaning" ? item.clue : item.word,
+        expected: item.word,
         correct: ok
       };
     }
@@ -3163,7 +3194,6 @@
       const item = currentWord();
       let ok = false;
       if (state.mode === "choice") ok = state.selected === item.word;
-      if (state.mode === "meaning") ok = state.selected === item.clue;
       if (state.mode === "completion") ok = state.built.toLowerCase() === item.word.toLowerCase();
 
       state.checked = true;
@@ -3182,7 +3212,6 @@
       state.recentAnswers = [answerRecord, ...state.recentAnswers.filter((answer) => answer.answer_id !== answerRecord.answer_id)];
       const earnedBadge = awardSetBadgeIfEarned();
       if (state.mode === "choice") renderChoice();
-      if (state.mode === "meaning") renderMeaning();
       setFeedback(ok, item);
       updateChrome();
       await saveProgress(answerRecord);
@@ -3227,7 +3256,6 @@
       el.feedback.className = "feedback";
       el.feedback.textContent = "Current question cleared. Pick an answer when ready.";
       if (state.mode === "choice") renderChoice();
-      if (state.mode === "meaning") renderMeaning();
       if (state.mode === "completion") renderCompletion();
       updateChrome();
     }
@@ -3271,10 +3299,9 @@
       renderQuestion();
     });
 
-    el.weeks.addEventListener("click", async (event) => {
-      const button = event.target.closest("[data-week]");
-      if (!button) return;
-      state.week = Number(button.dataset.week);
+    el.weeks.addEventListener("change", async (event) => {
+      if (event.target.id !== "weekSelect") return;
+      state.week = Number(event.target.value);
       state.index = 0;
       saveSession();
       await loadProgress();
