@@ -1340,7 +1340,7 @@
         </svg>
         <div>
           <h1>Vocabulary Fun Practice</h1>
-          <p class="subtitle">Word completion, word choice, spelling, and sentence power for Evelyn, Ella, Nianwen, and Teng.</p>
+          <p class="subtitle">Word completion, word choice, spelling, and meaning match for Evelyn, Ella, Nianwen, and Teng.</p>
         </div>
       </div>
       <div class="score-strip" aria-label="Practice score">
@@ -1881,19 +1881,12 @@
         label: "Meaning Match",
         summary: "Read the word, then pick its meaning.",
         icon: "meaning"
-      },
-      sentence: {
-        title: "Type the missing word.",
-        label: "Sentence Builder",
-        summary: "Type the vocabulary word that completes the sentence.",
-        icon: "sentence"
       }
     };
 
     const modeAliases = {
       completion: ["completion", "complete", "word-completion", "wordCompletion"],
-      meaning: ["meaning", "meaning-match", "meaningMatch", "match"],
-      sentence: ["sentence", "sentence-builder", "sentenceBuilder", "builder"]
+      meaning: ["meaning", "meaning-match", "meaningMatch", "match"]
     };
 
     weeklySets.ella = k12Sets.ella;
@@ -1912,8 +1905,7 @@
     const icons = {
       choice: '<svg class="mode-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="m15 17 2 2 4-5" stroke="#4d7c0f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
       complete: '<svg class="mode-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="2"/><rect x="10" y="5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="2"/><rect x="17" y="5" width="4" height="5" rx="1" stroke="currentColor" stroke-width="2"/><path d="M4 17h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
-      meaning: '<svg class="mode-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 5h9a4 4 0 0 1 0 8H5z" stroke="currentColor" stroke-width="2"/><path d="M5 13h11a3 3 0 0 1 0 6H5z" stroke="#b45309" stroke-width="2"/></svg>',
-      sentence: '<svg class="mode-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M17 12h3" stroke="#be123c" stroke-width="2.2" stroke-linecap="round"/></svg>'
+      meaning: '<svg class="mode-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 5h9a4 4 0 0 1 0 8H5z" stroke="currentColor" stroke-width="2"/><path d="M5 13h11a3 3 0 0 1 0 6H5z" stroke="#b45309" stroke-width="2"/></svg>'
     };
 
     const storageKeys = {
@@ -2250,7 +2242,8 @@
     }
 
     function canonicalMode(mode) {
-      return Object.entries(modeAliases).find(([, aliases]) => aliases.includes(mode))?.[0] || mode;
+      const canonical = Object.entries(modeAliases).find(([, aliases]) => aliases.includes(mode))?.[0] || mode;
+      return modes[canonical] ? canonical : "choice";
     }
 
     function answerText(answer) {
@@ -2755,23 +2748,10 @@
       `;
     }
 
-    function renderSentence() {
-      const item = currentWord();
-      el.questionPanel.innerHTML = `
-        <span class="mission-tag">Type To Unlock</span>
-        <div class="arena-status"><span>Combo x${state.combo}</span><span>${state.checked ? "Locked" : "Ready"}</span></div>
-        <p class="question">${escapeHTML(item.sentence)}</p>
-        <p class="hint">Clue: ${escapeHTML(item.clue)}</p>
-        <input class="type-answer" id="typedAnswer" type="text" autocomplete="off" spellcheck="false" placeholder="Type the missing word" value="${escapeAttr(state.selected)}">
-      `;
-      document.querySelector("#typedAnswer").focus();
-    }
-
     function renderCurrentMode() {
       if (state.mode === "choice") renderChoice();
       if (state.mode === "meaning") renderMeaning();
       if (state.mode === "completion") renderCompletion();
-      if (state.mode === "sentence") renderSentence();
     }
 
     function renderQuestion() {
@@ -2838,7 +2818,6 @@
 
     function answerValue(item, ok) {
       if (state.mode === "completion") return state.built || "";
-      if (state.mode === "sentence") return state.selected || "";
       return state.selected || "";
     }
 
@@ -3186,11 +3165,6 @@
       if (state.mode === "choice") ok = state.selected === item.word;
       if (state.mode === "meaning") ok = state.selected === item.clue;
       if (state.mode === "completion") ok = state.built.toLowerCase() === item.word.toLowerCase();
-      if (state.mode === "sentence") {
-        const input = document.querySelector("#typedAnswer");
-        state.selected = input ? input.value.trim().toLowerCase() : "";
-        ok = state.selected === item.word.toLowerCase();
-      }
 
       state.checked = true;
       const answerRecord = makeAnswerRecord(item, ok);
@@ -3255,7 +3229,6 @@
       if (state.mode === "choice") renderChoice();
       if (state.mode === "meaning") renderMeaning();
       if (state.mode === "completion") renderCompletion();
-      if (state.mode === "sentence") renderSentence();
       updateChrome();
     }
 
