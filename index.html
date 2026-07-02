@@ -1374,7 +1374,7 @@
         </svg>
         <div>
           <h1>Vocabulary Fun Practice</h1>
-          <p class="subtitle">Word completion, word choice, and spelling practice for Evelyn and Ella.</p>
+          <p class="subtitle">Word completion and spelling practice for Evelyn and Ella.</p>
         </div>
       </div>
       <div class="score-strip" aria-label="Practice score">
@@ -1431,7 +1431,7 @@
           </div>
           <div class="intro">
             <p class="kicker" id="kicker">Rising 4th Grade</p>
-            <h2 id="modeTitle">Choose the best word.</h2>
+            <h2 id="modeTitle">Complete the word.</h2>
             <p id="modeDescription">Practice grade-ready vocabulary with quick rounds, instant feedback, and a word bank that changes with each profile.</p>
           </div>
         </section>
@@ -1443,7 +1443,7 @@
             <div class="quest-card"><span>Arcade</span><strong id="questArcade">Unlock games</strong></div>
           </div>
           <div class="prompt-row">
-            <h3 id="questionTitle">Word Choice</h3>
+            <h3 id="questionTitle">Word Completion</h3>
             <span class="round-pill" id="roundPill">Round 1</span>
           </div>
           <div class="game-meter" id="gameMeter" style="--progress:10%"><span></span></div>
@@ -2427,6 +2427,8 @@
       completion: ["completion", "complete", "word-completion", "wordCompletion"]
     };
 
+    const activeModeKeys = ["completion"];
+
     weeklySets.ella = k12Sets.ella;
     weeklySets.evelyn = k12Sets.evelyn;
 
@@ -2471,7 +2473,7 @@
 
     const state = {
       profile: normalizeProfile(savedSession.profile || "evelyn"),
-      mode: canonicalMode(savedSession.mode || "choice"),
+      mode: canonicalMode(savedSession.mode || "completion"),
       week: Number.isInteger(savedSession.week) ? savedSession.week : defaultWeekIndex(),
       index: 0,
       stars: 0,
@@ -2831,7 +2833,7 @@
 
     function canonicalMode(mode) {
       const canonical = Object.entries(modeAliases).find(([, aliases]) => aliases.includes(mode))?.[0] || mode;
-      return modes[canonical] ? canonical : "choice";
+      return activeModeKeys.includes(canonical) ? canonical : "completion";
     }
 
     function answerText(answer) {
@@ -2879,7 +2881,7 @@
       const hasCompletionColumns = row && ("completed_set" in row || "badge_count" in row || "badges" in row);
       const hasBadge = Number(row?.badge_count || 0) > 0 || Boolean(row?.completed_set) || (!hasCompletionColumns && setCompleteFromAnswers(row?.recent_answers, row));
       if (!hasBadge) return [];
-      const modeKey = modes[canonicalMode(row?.mode || state.mode)] ? canonicalMode(row?.mode || state.mode) : "choice";
+      const modeKey = modes[canonicalMode(row?.mode || state.mode)] ? canonicalMode(row?.mode || state.mode) : "completion";
       return [{
         badge_id: badgeIdFor(row),
         learner: row?.learner || state.profile,
@@ -3347,12 +3349,15 @@
       `;
       }).join("");
 
-      el.modes.innerHTML = Object.entries(modes).map(([key, mode]) => `
+      el.modes.innerHTML = activeModeKeys.map((key) => {
+        const mode = modes[key];
+        return `
         <button class="select-btn" type="button" data-mode="${key}" aria-pressed="${key === state.mode}">
           ${icons[mode.icon]}
           <span><strong>${mode.label}</strong><small>${mode.summary}</small></span>
         </button>
-      `).join("");
+      `;
+      }).join("");
 
       el.weeks.innerHTML = `
         <div class="week-picker">
