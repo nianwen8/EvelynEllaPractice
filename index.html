@@ -1515,12 +1515,7 @@
 
     function buildWordSet(entries) {
       return entries.map((entry, index) => {
-        const choices = [entry.word];
-        for (let offset = 1; choices.length < 4 && offset < entries.length; offset += 1) {
-          const candidate = entries[(index + offset) % entries.length].word;
-          if (!choices.includes(candidate)) choices.push(candidate);
-        }
-        return { synonym: "similar word", antonym: "opposite word", ...entry, choices };
+        return { synonym: "similar word", antonym: "opposite word", ...entry, choices: buildChoices(entry, entries, index) };
       });
     }
 
@@ -1639,6 +1634,111 @@
       also: "Maya packed water and ___ brought a snack."
     };
 
+    Object.assign(localSceneSentences, {
+      cat: "The ___ curled up on the sunny window seat.",
+      mat: "Ella wiped her shoes on the ___ by the door.",
+      sat: "After the long walk, Dad ___ on the bench.",
+      hat: "Maya wore a warm ___ on the windy playground.",
+      man: "The ___ held the door open at the store.",
+      can: "We ___ finish the puzzle before dinner.",
+      ran: "Evelyn ___ to catch the ball at recess.",
+      pan: "Mom cooked eggs in the small ___.",
+      map: "The family used a ___ to find the trail.",
+      cap: "Leo put on his baseball ___ before practice.",
+      nap: "The tired puppy took a ___ after lunch.",
+      tap: "Please ___ the drum softly during music class.",
+      back: "Ella put the library book ___ on the shelf.",
+      sack: "The potatoes were carried in a brown ___.",
+      black: "The ___ marker made a bold line on the poster.",
+      snack: "The class ate a healthy ___ after the field trip.",
+      pit: "The peach had a hard ___ in the middle.",
+      sit: "Please ___ on the rug for story time.",
+      hit: "The tennis ball ___ the fence and bounced back.",
+      bit: "A small ___ of string was stuck to the tape.",
+      fit: "The puzzle piece did not ___ in that space.",
+      big: "A ___ cloud covered the sun during recess.",
+      pig: "The pink ___ rolled in the mud at the farm.",
+      dig: "The kids used shovels to ___ in the garden.",
+      wig: "The actor wore a curly ___ for the play.",
+      pin: "Mom used a ___ to hold the paper on the board.",
+      thin: "The ice was too ___ for skating.",
+      spin: "The top began to ___ across the table.",
+      skin: "A lizard's ___ can feel dry and rough.",
+      got: "Ella ___ a sticker for finishing her work.",
+      hot: "The cocoa was too ___ to drink right away.",
+      pot: "Dad watered the basil growing in the ___.",
+      dot: "Put one red ___ beside the correct answer.",
+      lot: "There were a ___ of leaves on the sidewalk.",
+      us: "Grandma waved to ___ from the porch.",
+      up: "The balloon floated ___ toward the ceiling.",
+      cup: "Please pour the water into the blue ___.",
+      pup: "The ___ wagged its tail when Ella came home.",
+      bus: "The yellow ___ stopped at the corner.",
+      cut: "Use scissors to ___ along the dotted line.",
+      must: "You ___ wear a helmet when you ride.",
+      jump: "Evelyn can ___ over the puddle.",
+      sand: "The children built a castle in the ___.",
+      hand: "Raise your ___ if you know the answer.",
+      land: "The plane will ___ after the storm passes.",
+      fast: "The rabbit ran ___ across the yard.",
+      last: "Ella saved the ___ cookie for her sister.",
+      past: "We walked ___ the park on the way home.",
+      milk: "The baby drank ___ from a cup.",
+      desk: "Maya cleaned her ___ before art class.",
+      mask: "The doctor wore a ___ at the clinic.",
+      left: "Only one pencil was ___ in the box.",
+      kept: "Evelyn ___ her ticket in her pocket.",
+      felt: "The blanket ___ soft after it was washed.",
+      high: "The kite flew ___ above the playground.",
+      every: "Maya reads for ten minutes ___ night.",
+      near: "The cat slept ___ the warm window.",
+      west: "The sun looked orange in the ___ sky.",
+      dress: "Ella chose a blue ___ for picture day.",
+      best: "Evelyn gave her ___ effort on the quiz.",
+      next: "The ___ student in line held the door.",
+      else: "Does anyone ___ need a pencil?",
+      checked: "Dad ___ the door before bedtime.",
+      grand: "The concert ended with a ___ finale.",
+      stand: "Please ___ behind the line until your turn.",
+      punish: "The coach did not ___ mistakes during practice.",
+      monarch: "A ___ butterfly rested on the milkweed.",
+      migrate: "Some birds ___ south when winter comes.",
+      butterfly: "A colorful ___ landed on the flower.",
+      nectar: "The bee drank ___ from the blossom.",
+      between: "Ella sat ___ Evelyn and Mom at dinner.",
+      own: "Maya packed her ___ lunch for the trip.",
+      base: "The runner touched first ___ before stopping.",
+      country: "Canada is a ___ north of the United States.",
+      plant: "The class watered the bean ___ each morning.",
+      slip: "Be careful not to ___ on the wet floor.",
+      lunch: "Evelyn packed grapes with her ___.",
+      pond: "Ducks swam across the quiet ___.",
+      front: "The teacher stood at the ___ of the room.",
+      thump: "We heard a loud ___ when the book fell.",
+      inches: "The ribbon was twelve ___ long.",
+      yard: "The children played soccer in the ___.",
+      area: "We found the ___ of the rectangle in math.",
+      formula: "The math ___ helped us solve the problem.",
+      width: "Measure the ___ of the table from side to side.",
+      calculate: "Use the numbers to ___ the total cost.",
+      save: "Ella put coins in a jar to ___ for a toy.",
+      school: "The bus arrived at ___ before the bell.",
+      father: "Her ___ helped bake muffins on Saturday.",
+      keep: "Please ___ your hands to yourself in line.",
+      safe: "The crossing guard helped everyone stay ___.",
+      grade: "Evelyn is proud of her math ___.",
+      reached: "Maya ___ the top shelf with a step stool.",
+      raise: "Please ___ your hand before speaking.",
+      theme: "The party's ___ was outer space.",
+      scream: "We heard a happy ___ on the roller coaster.",
+      easy: "The first problem was ___ after practice.",
+      highway: "Cars moved quickly along the ___.",
+      navigate: "The map helped us ___ through the museum.",
+      ocean: "Waves rolled across the blue ___.",
+      travel: "The family will ___ by train this summer.",
+      direction: "The arrow showed which ___ to go."
+    });
+
     const localWordMeanings = {
       the: "used before a noun to point to one specific person, place, or thing",
       of: "belonging to or connected with something",
@@ -1703,19 +1803,131 @@
       also: "in addition; too"
     };
 
+    Object.assign(localWordMeanings, {
+      cat: "a small furry animal often kept as a pet",
+      mat: "a flat piece of material placed on a floor or table",
+      sat: "rested with the body supported by a chair, bench, or floor",
+      hat: "a covering worn on the head",
+      man: "an adult male person",
+      can: "to be able to do something",
+      ran: "moved quickly on foot in the past",
+      pan: "a shallow container used for cooking",
+      map: "a drawing that shows places and directions",
+      cap: "a soft hat with a brim",
+      nap: "a short sleep",
+      tap: "to touch lightly or a small device that controls water",
+      back: "the rear side of something or returning to a place",
+      sack: "a large bag for carrying things",
+      black: "the darkest color",
+      snack: "a small amount of food eaten between meals",
+      pit: "a deep hole or the hard seed inside some fruits",
+      sit: "to rest with your body on a chair or surface",
+      hit: "to strike or touch with force",
+      bit: "a small piece or amount",
+      fit: "to be the right size or shape",
+      big: "large in size or amount",
+      pig: "a farm animal with a snout and curly tail",
+      dig: "to break up or move earth with a tool or hands",
+      wig: "fake hair worn on the head",
+      pin: "a small sharp object used to fasten things",
+      thin: "not thick or wide",
+      spin: "to turn around and around",
+      skin: "the outer covering of a person or animal",
+      got: "received, became, or had in the past",
+      hot: "having a high temperature",
+      pot: "a deep container used for cooking or planting",
+      dot: "a small round mark",
+      lot: "a large amount or number",
+      us: "the speaker and another person as the object of an action",
+      up: "toward a higher place",
+      cup: "a small container used for drinking",
+      pup: "a young dog",
+      bus: "a large vehicle that carries many passengers",
+      cut: "to make an opening or divide with something sharp",
+      must: "used to show that something is required",
+      jump: "to push off the ground with your feet",
+      sand: "tiny grains of rock found on beaches or deserts",
+      hand: "the body part at the end of your arm",
+      land: "the solid ground or to come down to the ground",
+      fast: "moving or happening quickly",
+      last: "coming after all others",
+      past: "a time before now or beyond a place",
+      milk: "a white drink that comes from cows or other animals",
+      desk: "a table used for reading, writing, or schoolwork",
+      mask: "a covering for the face",
+      left: "remaining after others are gone or the opposite of right",
+      kept: "held, saved, or continued to have in the past",
+      felt: "touched or experienced something in the past",
+      high: "far above the ground or reaching upward",
+      every: "each one in a group",
+      near: "close to something",
+      west: "the direction where the sun sets",
+      dress: "a piece of clothing with a top and skirt",
+      best: "better than all the others",
+      next: "coming immediately after this one",
+      else: "different or in addition",
+      checked: "looked at carefully to make sure something was right",
+      grand: "large, impressive, or important",
+      stand: "to be upright on your feet",
+      punish: "to give a penalty for breaking a rule",
+      monarch: "a king, queen, or a kind of orange-and-black butterfly",
+      migrate: "to move from one place to another with the seasons",
+      butterfly: "an insect with colorful wings",
+      nectar: "sweet liquid made by flowers",
+      between: "in the space separating two people or things",
+      own: "belonging to yourself",
+      base: "the bottom support or starting point",
+      country: "an area of land with its own government",
+      plant: "a living thing that grows in soil and often has leaves",
+      slip: "to slide by accident",
+      lunch: "a meal eaten in the middle of the day",
+      pond: "a small body of still water",
+      front: "the side or part that faces forward",
+      thump: "a heavy, dull sound",
+      inches: "small units used to measure length",
+      yard: "an outdoor area near a home or a unit of length",
+      area: "the amount of space inside a shape or place",
+      formula: "a rule written with numbers or symbols",
+      width: "the distance from one side to the other",
+      calculate: "to find an answer using math",
+      save: "to keep for later or protect from harm",
+      school: "a place where students learn",
+      father: "a male parent",
+      keep: "to continue having or holding something",
+      grade: "a school level or a score on work",
+      reached: "arrived at or stretched far enough to touch",
+      raise: "to lift or move something higher",
+      theme: "the main idea or topic",
+      scream: "a loud high cry",
+      easy: "not hard to do",
+      highway: "a main road for fast travel",
+      navigate: "to find the way through or around a place",
+      ocean: "a very large body of salt water",
+      travel: "to go from one place to another",
+      direction: "the way something points, moves, or faces"
+    });
+
     function meaningClue(word, fallback = "") {
-      return localWordMeanings[dictionaryKey(word)] || fallback || `the meaning of "${word}"`;
+      const key = dictionaryKey(word);
+      return localWordMeanings[key] || fallback || simpleMeaningFallback(word);
     }
 
-    function sceneSentence(word, partOfSpeech = "") {
+    function sceneSentence(word, partOfSpeech = "", theme = "") {
       const local = localSceneSentences[dictionaryKey(word)];
       if (local) return local;
-      const lowerPart = String(partOfSpeech || "").toLowerCase();
+      const lowerPart = String(partOfSpeech || preferredPartForWord(word)).toLowerCase();
+      const themeText = String(theme || "").toLowerCase();
+      if (themeText.includes("math") || ["add", "subtract", "answer", "quotient", "multiplication", "division", "zero", "amount", "formula", "calculate", "width", "area", "length", "weight", "height", "distance"].includes(dictionaryKey(word))) {
+        return "During math, the class used ___ to solve the problem.";
+      }
+      if (themeText.includes("science") || ["cycle", "resource", "growth", "affect", "mammal", "fruit", "organism", "ecosystem", "reproduce", "eclipse", "camouflage", "habitat", "prey", "predator", "continent", "earthquake", "tremor", "fault", "crust"].includes(dictionaryKey(word))) {
+        return "At the science table, the students observed ___ in the model.";
+      }
       if (lowerPart.includes("verb")) {
-        return "During class, the students will ___ before they share their work.";
+        return "During the project, the students will ___ before sharing their results.";
       }
       if (lowerPart.includes("adjective")) {
-        return "On the story page, the ___ character helped solve the problem.";
+        return "The ___ clue helped the team choose the right answer.";
       }
       if (lowerPart.includes("adverb")) {
         return "At breakfast, Maya packed her lunch and ___ checked her backpack.";
@@ -1732,7 +1944,7 @@
       if (lowerPart.includes("determiner") || lowerPart.includes("article")) {
         return "At the table, Dad picked up ___ small notebook.";
       }
-      return "In spelling practice, the teacher wrote ___ on the board for everyone to read.";
+      return "During the lesson, the teacher pointed to ___ in the picture.";
     }
 
     const preferredPartsOfSpeech = {
@@ -1779,14 +1991,106 @@
       often: "adverb",
       slowly: "adverb",
       very: "adverb",
-      too: "adverb"
+      too: "adverb",
+      not: "adverb",
+      just: "adverb",
+      high: "adjective",
+      near: "preposition",
+      own: "adjective",
+      safe: "adjective",
+      easy: "adjective",
+      tiny: "adjective",
+      whole: "adjective",
+      strong: "adjective",
+      known: "adjective",
+      close: "adjective",
+      enough: "adjective",
+      open: "adjective",
+      sharp: "adjective",
+      certain: "adjective",
+      complete: "adjective",
+      fresh: "adjective",
+      tropical: "adjective",
+      usually: "adverb",
+      across: "preposition",
+      today: "adverb",
+      early: "adverb",
+      toward: "preposition",
+      compatible: "adjective",
+      slowly: "adverb",
+      plenty: "noun"
     };
+
+    const partFallbacks = {
+      determiner: ["the", "this", "that", "any"],
+      preposition: ["in", "on", "over", "from", "with", "between", "across", "during"],
+      conjunction: ["and", "but", "or", "than"],
+      pronoun: ["you", "he", "they", "we", "me"],
+      adverb: ["also", "only", "soon", "very", "often", "slowly", "usually", "today"],
+      adjective: ["new", "little", "old", "same", "high", "best", "safe", "easy", "strong", "bright"],
+      verb: ["take", "know", "give", "live", "stand", "migrate", "calculate", "save", "raise", "navigate"],
+      noun: ["art", "place", "boy", "cat", "map", "school", "ocean", "butterfly", "pond", "answer"]
+    };
+
+    function inferPartFromShape(word) {
+      const key = dictionaryKey(word);
+      if (preferredPartsOfSpeech[key]) return preferredPartsOfSpeech[key];
+      if (key.endsWith("ly")) return "adverb";
+      if (key.endsWith("ed") || key.endsWith("ing") || key.endsWith("ate") || key.endsWith("ify") || key.endsWith("ize")) return "verb";
+      if (key.endsWith("ous") || key.endsWith("ful") || key.endsWith("less") || key.endsWith("able") || key.endsWith("ible") || key.endsWith("al") || key.endsWith("ic") || key.endsWith("ive") || key.endsWith("ile")) return "adjective";
+      if (key.endsWith("tion") || key.endsWith("sion") || key.endsWith("ment") || key.endsWith("ness") || key.endsWith("ity") || key.endsWith("ism") || key.endsWith("er") || key.endsWith("or")) return "noun";
+      return "noun";
+    }
+
+    function partBucket(word) {
+      const part = inferPartFromShape(word);
+      if (part.includes("preposition")) return "preposition";
+      if (part.includes("conjunction")) return "conjunction";
+      if (part.includes("pronoun")) return "pronoun";
+      if (part.includes("determiner") || part.includes("article")) return "determiner";
+      if (part.includes("adverb")) return "adverb";
+      if (part.includes("adjective")) return "adjective";
+      if (part.includes("verb")) return "verb";
+      return "noun";
+    }
+
+    function buildChoices(entry, entries, index) {
+      const correct = entry.word;
+      const targetPart = partBucket(correct);
+      const choices = [correct];
+      const samePart = entries
+        .map((item) => item.word)
+        .filter((word) => word !== correct && partBucket(word) === targetPart);
+      const pool = [...samePart, ...(partFallbacks[targetPart] || []), ...entries.map((item) => item.word)];
+      for (const candidate of pool) {
+        if (choices.length >= 4) break;
+        if (candidate && !choices.includes(candidate)) choices.push(candidate);
+      }
+      for (let offset = 1; choices.length < 4 && offset < entries.length + 4; offset += 1) {
+        const candidate = entries[(index + offset) % entries.length].word;
+        if (!choices.includes(candidate)) choices.push(candidate);
+      }
+      return choices;
+    }
+
+    function simpleMeaningFallback(word) {
+      const part = partBucket(word);
+      const lower = dictionaryKey(word);
+      if (part === "verb") return `to do the action "${lower}"`;
+      if (part === "adjective") return `describing something as "${lower}"`;
+      if (part === "adverb") return `describing how, when, or how much something happens`;
+      if (part === "preposition") return `showing how one person, place, or thing relates to another`;
+      if (part === "conjunction") return `joining words or ideas in a sentence`;
+      if (part === "pronoun") return `standing in for a noun already known in the sentence`;
+      if (part === "determiner") return `pointing to which person, place, or thing is meant`;
+      return `a person, place, thing, or idea named "${lower}"`;
+    }
 
     function makeK12Entry(word, grade, week, theme, position) {
       return {
         word,
         clue: meaningClue(word),
-        sentence: sceneSentence(word),
+        sentence: sceneSentence(word, preferredPartForWord(word), theme),
         synonym: "practice word",
         antonym: "different word"
       };
@@ -2153,7 +2457,7 @@
       session: "vocabPracticeSessionReset20260525",
       decorations: "vocabPracticeDecorations20260614",
       arcade: "vocabPracticeArcadeSpending20260615",
-      dictionary: "vocabPracticeDictionaryHints20260630MeaningCluesV1"
+      dictionary: "vocabPracticeDictionaryHints20260701ScenarioCluesV2"
     };
 
     function defaultWeekIndex() {
